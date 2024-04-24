@@ -1,2 +1,4 @@
-github.com/tonie-ng/go-dotenv v0.1.1 h1:NIYEdGL36hTqq1WSX50uYzdnhbjUtermV4ViWe11S68=
-github.com/tonie-ng/go-dotenv v0.1.1/go.mod h1:XVzkNdafBDpvbCmukTU+P7mEXOgyrA/PcrH4+7XR6Ek=
+github.com/lib/pq v1.10.9 h1:YXG7RB+JIjhP29X+OtkiDnYaXQwpS4JEWq7dtCCRUEw=
+github.com/lib/pq v1.10.9/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
+github.com/tonie-ng/go-dotenv v0.1.2 h1:w6hvMzE4ALBcRfHW3y9ut7rDdq9/mWhjNtpAay+ZZo4=
+github.com/tonie-ng/go-dotenv v0.1.2/go.mod h1:XVzkNdafBDpvbCmukTU+P7mEXOgyrA/PcrH4+7XR6Ek=

@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"time"
 
-	"nest/lib/middleware"
+	"snipnet/lib/middleware"
 )
 
 type APIServer struct {
