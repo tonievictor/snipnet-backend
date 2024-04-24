@@ -1,8 +1,6 @@
 package database
 
 import (
-	"bytes"
-	"log"
 	"os"
 	"testing"
 
@@ -12,20 +10,16 @@ import (
 
 func TestDB(t *testing.T) {
 	dotenv.Config("../../.env")
-	var bw bytes.Buffer
-	l := log.New(&bw, "nest_test: ", log.LstdFlags)
 
 	t.Run("Test correct database creation", func(t *testing.T) {
-		db := New("postgres", os.Getenv("DB_CONN_STRING"), l)
-		err := db.Init()
+		_, err := Init("postgres", os.Getenv("DB_CONN_STRING"))
 		if err != nil {
 			t.Error(err)
 		}
 	})
 
 	t.Run("Test incorrect database creation", func(t *testing.T) {
-		db := New("post", os.Getenv("DB_CONN_STRING"), l)
-		err := db.Init()
+		_, err := Init("postgr", os.Getenv("DB_CONN_STRI"))
 		if err == nil {
 			t.Error(err)
 		}

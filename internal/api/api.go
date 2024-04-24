@@ -2,24 +2,23 @@ package api
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+
+	log "github.com/siruspen/logrus"
 
 	"snipnet/lib/middleware"
 )
 
 type APIServer struct {
 	address string
-	log     *log.Logger
 }
 
-func New(l *log.Logger) *APIServer {
+func New(port string) *APIServer {
 	apiserver := &APIServer{
-		address: os.Getenv("PORT"),
-		log:     l,
+		address: port,
 	}
 	return apiserver
 }
@@ -27,18 +26,19 @@ func New(l *log.Logger) *APIServer {
 func (a *APIServer) Init(router *http.ServeMux) {
 	server := http.Server{
 		Addr:         a.address,
-		Handler:      middleware.Logger(router, a.log),
+		Handler:      middleware.Logger(router),
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,
 	}
 
-	a.log.Printf("Starting server on port %s\n", a.address)
+	log.Infof("Starting server on port %s...\n", a.address)
 
 	go func() {
 		err := server.ListenAndServe()
 		if err != nil {
-			a.log.Fatal(err)
+			log.Fatal(err)
+			return
 		}
 	}()
 
@@ -47,7 +47,8 @@ func (a *APIServer) Init(router *http.ServeMux) {
 	signal.Notify(sigchan, os.Kill)
 
 	sig := <-sigchan
-	a.log.Println("\nGraceful shutdown: received ", sig)
+
+	log.Info("Graceful shutdown: received ", sig)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	cancel()
