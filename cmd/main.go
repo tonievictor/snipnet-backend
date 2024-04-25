@@ -10,6 +10,7 @@ import (
 	"snipnet/internal/api"
 	"snipnet/internal/routes"
 	"snipnet/lib/database"
+	"snipnet/lib/services"
 )
 
 func main() {
@@ -21,6 +22,7 @@ func main() {
 		return
 	}
 
+	services.New(db)
 	router := routes.Routes()
 	server := api.New(os.Getenv("PORT"))
 	server.Init(router)
