@@ -49,7 +49,7 @@ func tables() string {
 
 		CREATE TABLE IF NOT EXISTS snippets (
 			id TEXT PRIMARY KEY NOT NULL UNIQUE,
-			user_id TEXT NOT NULL UNIQUE,
+			user_id TEXT NOT NULL,
 			title TEXT NOT NULL DEFAULT 'Untitled',
 			description TEXT NOT NULL DEFAULT '',
 			code TEXT NOT NULL DEFAULT '',
@@ -58,11 +58,12 @@ func tables() string {
 			FOREIGN KEY (user_id) REFERENCES users (id)
 		);
 
-		CREATE TABLE IF NOT EXISTS tokens (
+		CREATE TABLE IF NOT EXISTS sessions (
 			id SERIAL PRIMARY KEY,
-			token TEXT NOT NULL UNIQUE,
-			user_id TEXT NOT NULL UNIQUE,
+			session_id TEXT NOT NULL UNIQUE,
+			user_id TEXT NOT NULL,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			expiry_time TIMESTAMP NOT NULL,
 			FOREIGN KEY (user_id) REFERENCES users (id)
 		);
 	`

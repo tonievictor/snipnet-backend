@@ -26,7 +26,10 @@ func Routes() *http.ServeMux {
 	})
 
 	users := services.User{}
-	auth := controllers.NewAuthController(&users, &logger)
+	sessions := services.Session{}
+	auth := controllers.NewAuthController(&users, &sessions, &logger)
 	router.HandleFunc("POST /signup", auth.Signup)
+	router.HandleFunc("POST /signin", auth.Signin)
+	router.HandleFunc("POST /signout", auth.Signout)
 	return router
 }

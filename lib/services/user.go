@@ -10,6 +10,8 @@ type UserStore interface {
 	GetUser(field, value string) (*User, error)
 	CheckUser(username, email string) (*User, error)
 	CreateUser(user *User) (*User, error)
+	DeleteUser(id string) error
+	UpdateUser(id, field, value string) (*User, error)
 }
 
 type User struct {
@@ -17,6 +19,7 @@ type User struct {
 	Username  string    `json:"username" validate:"required"`
 	Password  string    `json:"password" validate:"required"`
 	Email     string    `json:"email" validate:"required,email"`
+	AuthToken string    `json:"auth_token"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -91,4 +94,70 @@ func (u *User) CreateUser(user *User) (*User, error) {
 	}
 
 	return &saveduser, nil
+}
+
+func (u *User) DeleteUser(id string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+	defer cancel()
+
+	query := `DELETE FROM users WHERE id = $1;`
+
+	_, err := db.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u *User) GetUsers() (*[]*User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+	defer cancel()
+	var users []*User
+
+	query := "SELECT id, username, password, email, created_at, updated_at FROM users;"
+
+	row, err := db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	for row.Next() {
+		var user User
+		err = row.Scan(
+			&user.ID,
+			&user.Username,
+			&user.Password,
+			&user.Email,
+			user.CreatedAt,
+			user.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, &user)
+	}
+	return &users, nil
+}
+
+func (u *User) UpdateUser(id, field, value string) (*User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+	defer cancel()
+
+	var user User
+
+	query := fmt.Sprintf("UPDATE users SET %s = $1, updated_at = $2 WHERE id = $3 RETURNING id, username, email, created_at, updated_at", field)
+	row := db.QueryRowContext(ctx, query, value, time.Now(), id)
+
+	err := row.Scan(
+		&user.ID,
+		&user.Email,
+		&user.Username,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, err
 }
