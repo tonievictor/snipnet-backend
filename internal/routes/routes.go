@@ -7,6 +7,7 @@ import (
 	"github.com/siruspen/logrus"
 
 	"snipnet/internal/controllers"
+	"snipnet/lib/cache"
 	"snipnet/lib/services"
 )
 
@@ -18,6 +19,7 @@ func Routes() *http.ServeMux {
 		Hooks:     make(logrus.LevelHooks),
 		Level:     logrus.DebugLevel,
 	}
+	rds := cache.Init(os.Getenv("REDIS_CLIENT"))
 
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -26,8 +28,7 @@ func Routes() *http.ServeMux {
 	})
 
 	users := services.User{}
-	sessions := services.Session{}
-	auth := controllers.NewAuthController(&users, &sessions, &logger)
+	auth := controllers.NewAuthController(&users, &logger, rds)
 	router.HandleFunc("POST /signup", auth.Signup)
 	router.HandleFunc("POST /signin", auth.Signin)
 	router.HandleFunc("POST /signout", auth.Signout)

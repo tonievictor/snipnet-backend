@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -9,6 +11,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 	"github.com/siruspen/logrus"
 	"golang.org/x/crypto/bcrypt"
 
@@ -16,24 +19,34 @@ import (
 	"snipnet/lib/services"
 )
 
-const SessionCookieName = "auth_token"
+const (
+	SessionMaxAge = 259200
+)
 
 type SigninInput struct {
 	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
 }
 
-type AuthController struct {
-	users    services.UserStore
-	sessions services.SessionStore
-	log      *logrus.Logger
+type Session struct {
+	UserID     string
+	CreatedAt  time.Time
+	ExpiryTime time.Time
 }
 
-func NewAuthController(users services.UserStore, sessions services.SessionStore, log *logrus.Logger) *AuthController {
+var ctx = context.Background()
+
+type AuthController struct {
+	users services.UserStore
+	log   *logrus.Logger
+	cache *redis.Client
+}
+
+func NewAuthController(users services.UserStore, log *logrus.Logger, rds *redis.Client) *AuthController {
 	return &AuthController{
-		users:    users,
-		sessions: sessions,
-		log:      log,
+		users: users,
+		log:   log,
+		cache: rds,
 	}
 }
 
@@ -90,21 +103,19 @@ func (a *AuthController) Signin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	auth := r.Header.Get("Authorization")
+	if len(auth) > 0 && len(strings.SplitN(auth, " ", 2)) == 2 {
+		token := strings.SplitN(auth, " ", 2)[1]
+		err := a.cache.Get(ctx, token).Err()
+		if err != redis.Nil {
+			_ = a.cache.Del(ctx, token).Err()
+		}
+	}
+
 	if err = utils.Validate.Struct(body); err != nil {
 		error := err.(validator.ValidationErrors)
 		utils.WriteErr(w, http.StatusBadRequest, "Missing parameters", error, a.log)
 		return
-	}
-	auth := r.Header.Get("Authorization")
-	if len(auth) != 0 && len(strings.Split(auth, " ")) != 1 {
-		token := strings.Split(auth, " ")[1]
-		if token != "" {
-			sess, err := a.sessions.GetSession(token)
-			if err == nil && time.Until(sess.ExpiryTime) > 0 {
-				utils.WriteErr(w, http.StatusConflict, "Account is already logged in", errors.New("Account is logged in"), a.log)
-				return
-			}
-		}
 	}
 
 	user, err := a.users.GetUser("username", body.Username)
@@ -120,7 +131,16 @@ func (a *AuthController) Signin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	session_id := utils.GenerateSessionID()
-	_, err = a.sessions.CreateSession(user.ID, session_id)
+	session, err := json.Marshal(Session{
+		UserID:     user.ID,
+		CreatedAt:  time.Now(),
+		ExpiryTime: time.Now().Add(time.Hour * 24 * 3),
+	})
+	if err != nil {
+		utils.WriteErr(w, http.StatusInternalServerError, "An error occured while creating a new session", err, a.log)
+		return
+	}
+	err = a.cache.Set(ctx, session_id, session, time.Second*259200).Err()
 	if err != nil {
 		utils.WriteErr(w, http.StatusInternalServerError, "An error occured while creating a new session", err, a.log)
 		return
@@ -145,13 +165,13 @@ func (a *AuthController) Signout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := a.sessions.GetSession(token)
-	if err != nil {
+	err := a.cache.Get(ctx, token).Err()
+	if err == redis.Nil || err != nil {
 		utils.WriteErr(w, http.StatusUnauthorized, "Invalid session token", err, a.log)
 		return
 	}
 
-	err = a.sessions.DeleteSession(token)
+	err = a.cache.Del(ctx, token).Err()
 	if err != nil {
 		utils.WriteErr(w, http.StatusInternalServerError, "Unable to log you out, please try again", err, a.log)
 		return
