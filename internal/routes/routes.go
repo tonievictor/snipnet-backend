@@ -8,6 +8,7 @@ import (
 
 	"snipnet/internal/controllers"
 	"snipnet/lib/cache"
+	"snipnet/lib/middleware"
 	"snipnet/lib/services"
 )
 
@@ -28,9 +29,14 @@ func Routes() *http.ServeMux {
 	})
 
 	users := services.User{}
-	auth := controllers.NewAuthController(&users, &logger, rds)
-	router.HandleFunc("POST /signup", auth.Signup)
-	router.HandleFunc("POST /signin", auth.Signin)
-	router.HandleFunc("POST /signout", auth.Signout)
+	auth_controller := controllers.NewAuthController(&users, &logger, rds)
+	router.HandleFunc("POST /signup", auth_controller.Signup)
+	router.HandleFunc("POST /signin", auth_controller.Signin)
+	router.HandleFunc("POST /signout", middleware.IsAuthenticated(auth_controller.Signout, &logger, rds))
+
+	snippets := services.Snippet{}
+	snippet_controller := controllers.NewSnippetController(&snippets, &logger, rds)
+	router.HandleFunc("GET /snippets/{id}", middleware.IsAuthenticated(snippet_controller.GetSnippetByID, &logger, rds))
+	router.HandleFunc("POST /snippets", middleware.IsAuthenticated(snippet_controller.CreateSnippet, &logger, rds))
 	return router
 }

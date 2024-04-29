@@ -17,6 +17,7 @@ import (
 
 	"snipnet/internal/utils"
 	"snipnet/lib/services"
+	"snipnet/lib/types"
 )
 
 const (
@@ -28,18 +29,13 @@ type SigninInput struct {
 	Password string `json:"password" validate:"required"`
 }
 
-type Session struct {
-	UserID     string
-	CreatedAt  time.Time
-	ExpiryTime time.Time
-}
-
 var ctx = context.Background()
 
 type AuthController struct {
 	users services.UserStore
 	log   *logrus.Logger
 	cache *redis.Client
+	ctx   context.Context
 }
 
 func NewAuthController(users services.UserStore, log *logrus.Logger, rds *redis.Client) *AuthController {
@@ -92,6 +88,7 @@ func (a *AuthController) Signup(w http.ResponseWriter, r *http.Request) {
 
 	user.Password = ""
 	utils.WriteRes(w, http.StatusCreated, "Account created successfully", user, a.log)
+	return
 }
 
 func (a *AuthController) Signin(w http.ResponseWriter, r *http.Request) {
@@ -104,8 +101,8 @@ func (a *AuthController) Signin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	auth := r.Header.Get("Authorization")
-	if len(auth) > 0 && len(strings.SplitN(auth, " ", 2)) == 2 {
-		token := strings.SplitN(auth, " ", 2)[1]
+	if !strings.HasPrefix(auth, "Bearer ") {
+		token := strings.TrimPrefix(auth, "Bearer ")
 		err := a.cache.Get(ctx, token).Err()
 		if err != redis.Nil {
 			_ = a.cache.Del(ctx, token).Err()
@@ -131,8 +128,9 @@ func (a *AuthController) Signin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	session_id := utils.GenerateSessionID()
-	session, err := json.Marshal(Session{
+	session, err := json.Marshal(types.Session{
 		UserID:     user.ID,
+		SessionID:  session_id,
 		CreatedAt:  time.Now(),
 		ExpiryTime: time.Now().Add(time.Hour * 24 * 3),
 	})
@@ -153,29 +151,13 @@ func (a *AuthController) Signin(w http.ResponseWriter, r *http.Request) {
 
 // Sign out
 func (a *AuthController) Signout(w http.ResponseWriter, r *http.Request) {
-	auth := r.Header.Get("Authorization")
-	if len(auth) == 0 || len(strings.Split(auth, " ")) != 2 {
-		utils.WriteErr(w, http.StatusUnauthorized, "You are not logged in", errors.New("Session id not found"), a.log)
-		return
-	}
-
-	token := strings.Split(auth, " ")[1]
-	if token == "" {
-		utils.WriteErr(w, http.StatusUnauthorized, "You are not logged in", errors.New("Session id not found"), a.log)
-		return
-	}
-
-	err := a.cache.Get(ctx, token).Err()
-	if err == redis.Nil || err != nil {
-		utils.WriteErr(w, http.StatusUnauthorized, "Invalid session token", err, a.log)
-		return
-	}
-
-	err = a.cache.Del(ctx, token).Err()
+	session := r.Context().Value(types.AuthSession).(types.Session)
+	err := a.cache.Del(ctx, session.SessionID).Err()
 	if err != nil {
 		utils.WriteErr(w, http.StatusInternalServerError, "Unable to log you out, please try again", err, a.log)
 		return
 	}
 
 	utils.WriteRes(w, http.StatusOK, "Account logged out successfully", "", a.log)
+	return
 }
