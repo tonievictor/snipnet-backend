@@ -57,15 +57,6 @@ func tables() string {
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY (user_id) REFERENCES users (id)
 		);
-
-		CREATE TABLE IF NOT EXISTS sessions (
-			id SERIAL PRIMARY KEY,
-			session_id TEXT NOT NULL UNIQUE,
-			user_id TEXT NOT NULL,
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			expiry_time TIMESTAMP NOT NULL,
-			FOREIGN KEY (user_id) REFERENCES users (id)
-		);
 	`
 	return query
 }
