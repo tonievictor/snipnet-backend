@@ -99,7 +99,7 @@ func (s *SnippetController) UpdateSnippetOne(w http.ResponseWriter, r *http.Requ
 	session := r.Context().Value(types.AuthSession).(types.Session)
 	id := r.PathValue("id")
 
-	var body types.UpdateSnippetOneData
+	var body types.UpdateOneData
 	err := utils.ParseJson(r, &body)
 	if err != nil {
 		utils.WriteErr(w, http.StatusBadRequest, "No payload attached to req", err, s.log)
@@ -123,9 +123,14 @@ func (s *SnippetController) UpdateSnippetOne(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	if body.Field != "title" && body.Field != "description" && body.Field != "code" {
+		utils.WriteErr(w, http.StatusBadRequest, "You can't updated that parameter", errors.New("Invalid field Value"), s.log)
+		return
+	}
+
 	snippet, err := s.snippets.UpdateSnippetSingle(id, body.Field, body.Value)
 	if err != nil {
-		utils.WriteErr(w, http.StatusInternalServerError, "Unable to update snippet", err, s.log)
+		utils.WriteErr(w, http.StatusBadRequest, "An error occured while updating the resource", err, s.log)
 		return
 	}
 

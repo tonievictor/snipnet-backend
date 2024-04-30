@@ -45,5 +45,10 @@ func Routes() *http.ServeMux {
 
 	user_controller := controllers.NewUserController(&users, &logger, rds)
 	router.HandleFunc("GET /users", middleware.IsAuthenticated(user_controller.GetUsers, &logger, rds))
+	router.HandleFunc("GET /users/{id}", middleware.IsAuthenticated(user_controller.GetUserByID, &logger, rds))
+	router.HandleFunc("GET /users/{id}/snippets", middleware.IsAuthenticated(snippet_controller.GetAllUserSnippets, &logger, rds))
+	router.HandleFunc("PATCH /users/{id}", middleware.IsAuthenticated(user_controller.UpdateUserOne, &logger, rds))
+	router.HandleFunc("PUT /users/{id}", middleware.IsAuthenticated(user_controller.UpdateUserMulti, &logger, rds))
+	router.HandleFunc("DELETE /users/{id}", middleware.IsAuthenticated(user_controller.DeleteUser, &logger, rds))
 	return router
 }

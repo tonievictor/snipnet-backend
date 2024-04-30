@@ -147,13 +147,14 @@ func (u *User) UpdateUserSingle(id, field, value string) (*User, error) {
 
 	var user User
 
-	query := fmt.Sprintf("UPDATE users SET %s = $1, updated_at = $2 WHERE id = $3 RETURNING id, username, email, created_at, updated_at", field)
+	query := fmt.Sprintf("UPDATE users SET %s = $1, updated_at = $2 WHERE id = $3 RETURNING id, username, password, email, created_at, updated_at", field)
 	row := db.QueryRowContext(ctx, query, value, time.Now(), id)
 
 	err := row.Scan(
 		&user.ID,
-		&user.Email,
 		&user.Username,
+		&user.Password,
+		&user.Email,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
@@ -170,13 +171,14 @@ func (u *User) UpdateUserMulti(usr *User) (*User, error) {
 
 	var user User
 
-	query := "UPDATE users SET username = $1, email = $2,updated_at = $3 WHERE id = $4 RETURNING id, username, email, created_at, updated_at"
+	query := "UPDATE users SET username = $1, email = $2,updated_at = $3 WHERE id = $4 RETURNING id, username, password, email, created_at, updated_at"
 	row := db.QueryRowContext(ctx, query, usr.Username, usr.Email, time.Now(), usr.ID)
 
 	err := row.Scan(
 		&user.ID,
-		&user.Email,
 		&user.Username,
+		&user.Password,
+		&user.Email,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)

@@ -21,8 +21,8 @@ type SnippetWithUser struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-type UpdateSnippetOneData struct {
-	Field string `json:"field" validate:"required" binding:"oneof=title description code"`
+type UpdateOneData struct {
+	Field string `json:"field" validate:"required"`
 	Value string `json:"value" validate:"required"`
 }
 
