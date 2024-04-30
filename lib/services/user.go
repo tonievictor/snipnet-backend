@@ -11,7 +11,8 @@ type UserStore interface {
 	CheckUser(username, email string) (*User, error)
 	CreateUser(user *User) (*User, error)
 	DeleteUser(id string) error
-	UpdateUser(id, field, value string) (*User, error)
+	UpdateUserMulti(usr *User) (*User, error)
+	UpdateUserSingle(id, field, value string) (*User, error)
 }
 
 type User struct {
@@ -139,7 +140,7 @@ func (u *User) GetUsers() (*[]*User, error) {
 	return &users, nil
 }
 
-func (u *User) UpdateUser(id, field, value string) (*User, error) {
+func (u *User) UpdateUserSingle(id, field, value string) (*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -147,6 +148,29 @@ func (u *User) UpdateUser(id, field, value string) (*User, error) {
 
 	query := fmt.Sprintf("UPDATE users SET %s = $1, updated_at = $2 WHERE id = $3 RETURNING id, username, email, created_at, updated_at", field)
 	row := db.QueryRowContext(ctx, query, value, time.Now(), id)
+
+	err := row.Scan(
+		&user.ID,
+		&user.Email,
+		&user.Username,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, err
+}
+
+func (u *User) UpdateUserMulti(usr *User) (*User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+	defer cancel()
+
+	var user User
+
+	query := "UPDATE users SET username = $1, email = $2,updated_at = $3 WHERE id = $4 RETURNING id, username, email, created_at, updated_at"
+	row := db.QueryRowContext(ctx, query, usr.Username, usr.Email, time.Now(), usr.ID)
 
 	err := row.Scan(
 		&user.ID,
