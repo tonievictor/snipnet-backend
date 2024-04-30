@@ -36,7 +36,14 @@ func Routes() *http.ServeMux {
 
 	snippets := services.Snippet{}
 	snippet_controller := controllers.NewSnippetController(&snippets, &logger, rds)
-	router.HandleFunc("GET /snippets/{id}", middleware.IsAuthenticated(snippet_controller.GetSnippetByID, &logger, rds))
+	router.HandleFunc("GET /snippets/{id}", snippet_controller.GetSnippetByID)
+	router.HandleFunc("GET /snippets", snippet_controller.GetAllSnippets)
 	router.HandleFunc("POST /snippets", middleware.IsAuthenticated(snippet_controller.CreateSnippet, &logger, rds))
+	router.HandleFunc("DELETE /snippets/{id}", middleware.IsAuthenticated(snippet_controller.DeleteSnippet, &logger, rds))
+	router.HandleFunc("PUT /snippets/{id}", middleware.IsAuthenticated(snippet_controller.UpdateSnippetMulti, &logger, rds))
+	router.HandleFunc("PATCH /snippets/{id}", middleware.IsAuthenticated(snippet_controller.UpdateSnippetOne, &logger, rds))
+
+	user_controller := controllers.NewUserController(&users, &logger, rds)
+	router.HandleFunc("GET /users", middleware.IsAuthenticated(user_controller.GetUsers, &logger, rds))
 	return router
 }

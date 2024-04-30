@@ -7,6 +7,7 @@ import (
 )
 
 type UserStore interface {
+	GetUsers() (*[]*User, error)
 	GetUser(field, value string) (*User, error)
 	CheckUser(username, email string) (*User, error)
 	CreateUser(user *User) (*User, error)
@@ -129,8 +130,8 @@ func (u *User) GetUsers() (*[]*User, error) {
 			&user.Username,
 			&user.Password,
 			&user.Email,
-			user.CreatedAt,
-			user.UpdatedAt,
+			&user.CreatedAt,
+			&user.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err

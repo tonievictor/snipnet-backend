@@ -9,14 +9,13 @@ import (
 )
 
 type SnippetStore interface {
-	GetSnippet(id string) (*Snippet, error)
+	GetSnippet(id string) (*types.SnippetWithUser, error)
 	CreateSnippet(snippet *Snippet) (*Snippet, error)
 	DeleteSnippet(id string) error
 	UpdateSnippetMulti(snippet *Snippet) (*Snippet, error)
 	UpdateSnippetSingle(id, field, value string) (*Snippet, error)
-	GetSnippets() (*[]*Snippet, error)
 	GetSnippetsUser(user_id string) (*[]*types.SnippetWithUser, error)
-	GetSnippetsUserMulti() (*[]*types.SnippetWithUser, error)
+	GetSnippets() (*[]*types.SnippetWithUser, error)
 }
 
 type Snippet struct {
@@ -69,7 +68,7 @@ func (s *Snippet) GetSnippetsUser(user_id string) (*[]*types.SnippetWithUser, er
 	return &snippets, nil
 }
 
-func (s *Snippet) GetSnippetsUserMulti() (*[]*types.SnippetWithUser, error) {
+func (s *Snippet) GetSnippets() (*[]*types.SnippetWithUser, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 	var snippets []*types.SnippetWithUser
@@ -108,55 +107,28 @@ func (s *Snippet) GetSnippetsUserMulti() (*[]*types.SnippetWithUser, error) {
 	return &snippets, nil
 }
 
-func (s *Snippet) GetSnippets() (*[]*Snippet, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
-	defer cancel()
-	var snippets []*Snippet
-
-	query := "SELECT id, user_id, title, description, code, created_at, updated_at FROM snippets"
-	row, err := db.QueryContext(ctx, query)
-	if err != nil {
-		return nil, err
-	}
-
-	for row.Next() {
-		var snippet Snippet
-
-		err := row.Scan(
-			&snippet.ID,
-			&snippet.UserID,
-			&snippet.Title,
-			&snippet.Description,
-			&snippet.Code,
-			&snippet.CreatedAt,
-			&snippet.UpdatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		snippets = append(snippets, &snippet)
-	}
-
-	return &snippets, nil
-}
-
-func (s *Snippet) GetSnippet(id string) (*Snippet, error) {
-	var snippet Snippet
+func (s *Snippet) GetSnippet(id string) (*types.SnippetWithUser, error) {
+	var snippet types.SnippetWithUser
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
 	query := `
-		SELECT id, user_id, title, description, code, created_at, updated_at FROM snippets WHERE id = $1;
+		SELECT snippets.id, snippets.user_id, snippets.title, snippets.description, snippets.code, users.username, users.email, snippets.created_at, snippets.updated_at
+		FROM snippets
+		INNER JOIN users ON snippets.user_id = users.id
+		WHERE snippets.id = $1;
 	`
 
 	row := db.QueryRowContext(ctx, query, id)
+
 	err := row.Scan(
 		&snippet.ID,
 		&snippet.UserID,
 		&snippet.Title,
 		&snippet.Description,
 		&snippet.Code,
+		&snippet.Username,
+		&snippet.Email,
 		&snippet.CreatedAt,
 		&snippet.UpdatedAt,
 	)
@@ -247,7 +219,7 @@ func (s *Snippet) UpdateSnippetMulti(snippet *Snippet) (*Snippet, error) {
 		WHERE id = $5 
 		RETURNING id, user_id, title, description, code, created_at, updated_at;
 	`
-	row := db.QueryRowContext(ctx, query, snippet.Title, snippet.Description, snippet.Code, time.Now())
+	row := db.QueryRowContext(ctx, query, snippet.Title, snippet.Description, snippet.Code, time.Now(), snippet.ID)
 	err := row.Scan(
 		&snip.ID,
 		&snip.UserID,

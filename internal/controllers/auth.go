@@ -35,7 +35,6 @@ type AuthController struct {
 	users services.UserStore
 	log   *logrus.Logger
 	cache *redis.Client
-	ctx   context.Context
 }
 
 func NewAuthController(users services.UserStore, log *logrus.Logger, rds *redis.Client) *AuthController {
