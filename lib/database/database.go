@@ -52,6 +52,7 @@ func tables() string {
 			user_id TEXT NOT NULL,
 			title TEXT NOT NULL DEFAULT 'Untitled',
 			description TEXT NOT NULL DEFAULT '',
+			language VARCHAR(20) NOT NULL DEFAULT '',
 			code TEXT NOT NULL DEFAULT '',
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

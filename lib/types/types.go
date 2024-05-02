@@ -14,6 +14,7 @@ type SnippetWithUser struct {
 	UserID      string    `json:"user_id"`
 	Title       string    `json:"title" validate:"required"`
 	Description string    `json:"description" validate:"required"`
+	Language    string    `json:"language" validate:"required"`
 	Code        string    `json:"code" validate:"required"`
 	Username    string    `json:"username" validate:"required"`
 	Email       string    `json:"email" validate:"required,email"`

@@ -23,6 +23,7 @@ type Snippet struct {
 	UserID      string    `json:"user_id"`
 	Title       string    `json:"title" validate:"required"`
 	Description string    `json:"description" validate:"required"`
+	Language    string    `json:"language" validate:"required"`
 	Code        string    `json:"code" validate:"required"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
@@ -34,7 +35,7 @@ func (s *Snippet) GetSnippetsUser(user_id string) (*[]*types.SnippetWithUser, er
 	var snippets []*types.SnippetWithUser
 
 	query := `
-		SELECT snippets.id, snippets.user_id, snippets.title, snippets.description, snippets.code, users.username, users.email, snippets.created_at, snippets.updated_at
+		SELECT snippets.id, snippets.user_id, snippets.title, snippets.description, snippets.language, snippets.code, users.username, users.email, snippets.created_at, snippets.updated_at
 		FROM snippets
 		INNER JOIN users ON snippets.user_id = users.id
 		WHERE snippets.user_id = $1;
@@ -52,6 +53,7 @@ func (s *Snippet) GetSnippetsUser(user_id string) (*[]*types.SnippetWithUser, er
 			&snippet.UserID,
 			&snippet.Title,
 			&snippet.Description,
+			&snippet.Language,
 			&snippet.Code,
 			&snippet.Username,
 			&snippet.Email,
@@ -74,7 +76,7 @@ func (s *Snippet) GetSnippets() (*[]*types.SnippetWithUser, error) {
 	var snippets []*types.SnippetWithUser
 
 	query := `
-		SELECT snippets.id, snippets.user_id, snippets.title, snippets.description, snippets.code, users.username, users.email, snippets.created_at, snippets.updated_at
+		SELECT snippets.id, snippets.user_id, snippets.title, snippets.description, snippets.language, snippets.code, users.username, users.email, snippets.created_at, snippets.updated_at
 		FROM snippets
 		INNER JOIN users ON snippets.user_id = users.id
 	`
@@ -91,6 +93,7 @@ func (s *Snippet) GetSnippets() (*[]*types.SnippetWithUser, error) {
 			&snippet.UserID,
 			&snippet.Title,
 			&snippet.Description,
+			&snippet.Language,
 			&snippet.Code,
 			&snippet.Username,
 			&snippet.Email,
@@ -113,7 +116,7 @@ func (s *Snippet) GetSnippet(id string) (*types.SnippetWithUser, error) {
 	defer cancel()
 
 	query := `
-		SELECT snippets.id, snippets.user_id, snippets.title, snippets.description, snippets.code, users.username, users.email, snippets.created_at, snippets.updated_at
+		SELECT snippets.id, snippets.user_id, snippets.title, snippets.description, snippets.language, snippets.code, users.username, users.email, snippets.created_at, snippets.updated_at
 		FROM snippets
 		INNER JOIN users ON snippets.user_id = users.id
 		WHERE snippets.id = $1;
@@ -126,6 +129,7 @@ func (s *Snippet) GetSnippet(id string) (*types.SnippetWithUser, error) {
 		&snippet.UserID,
 		&snippet.Title,
 		&snippet.Description,
+		&snippet.Language,
 		&snippet.Code,
 		&snippet.Username,
 		&snippet.Email,
@@ -146,17 +150,18 @@ func (s *Snippet) CreateSnippet(snippet *Snippet) (*Snippet, error) {
 	defer cancel()
 
 	query := `
-		INSERT INTO snippets (id, user_id, title, description, code, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING id, user_id, title, description, code, created_at, updated_at;
+		INSERT INTO snippets (id, user_id, title, description, language ,code, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, %8)
+		RETURNING id, user_id, title, description, language, code, created_at, updated_at;
 	`
 
-	row := db.QueryRowContext(ctx, query, snippet.ID, snippet.UserID, snippet.Title, snippet.Description, snippet.Code, time.Now(), time.Now())
+	row := db.QueryRowContext(ctx, query, snippet.ID, snippet.UserID, snippet.Title, snippet.Description, snippet.Language, snippet.Code, time.Now(), time.Now())
 	err := row.Scan(
 		&snip.ID,
 		&snip.UserID,
 		&snip.Title,
 		&snip.Description,
+		&snippet.Language,
 		&snip.Code,
 		&snip.CreatedAt,
 		&snip.UpdatedAt,
@@ -188,7 +193,7 @@ func (s *Snippet) UpdateSnippetSingle(id, field, value string) (*Snippet, error)
 	query := fmt.Sprintf(`
 		UPDATE snippets
 		SET %s = $1, updated_at = $2 WHERE id = $3
-		RETURNING id, user_id, title, description, code, created_at, updated_at;
+		RETURNING id, user_id, title, description, language, code, created_at, updated_at;
 		`, field)
 
 	row := db.QueryRowContext(ctx, query, value, time.Now(), id)
@@ -197,6 +202,7 @@ func (s *Snippet) UpdateSnippetSingle(id, field, value string) (*Snippet, error)
 		&snip.UserID,
 		&snip.Title,
 		&snip.Description,
+		&snip.Language,
 		&snip.Code,
 		&snip.CreatedAt,
 		&snip.UpdatedAt,
@@ -215,16 +221,17 @@ func (s *Snippet) UpdateSnippetMulti(snippet *Snippet) (*Snippet, error) {
 	var snip Snippet
 	query := `
 		UPDATE snippets
-		SET title = $1, description = $2, code = $3, updated_at = $4
-		WHERE id = $5 
+		SET title = $1, description = $2, language = $3, code = $4, updated_at = $5
+		WHERE id = $6
 		RETURNING id, user_id, title, description, code, created_at, updated_at;
 	`
-	row := db.QueryRowContext(ctx, query, snippet.Title, snippet.Description, snippet.Code, time.Now(), snippet.ID)
+	row := db.QueryRowContext(ctx, query, snippet.Title, snippet.Description, snippet.Language, snippet.Code, time.Now(), snippet.ID)
 	err := row.Scan(
 		&snip.ID,
 		&snip.UserID,
 		&snip.Title,
 		&snip.Description,
+		&snip.Language,
 		&snip.Code,
 		&snip.CreatedAt,
 		&snip.UpdatedAt,
