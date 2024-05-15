@@ -151,7 +151,7 @@ func (s *Snippet) CreateSnippet(snippet *Snippet) (*Snippet, error) {
 
 	query := `
 		INSERT INTO snippets (id, user_id, title, description, language ,code, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, %8)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		RETURNING id, user_id, title, description, language, code, created_at, updated_at;
 	`
 

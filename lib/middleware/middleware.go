@@ -4,13 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/siruspen/logrus"
-	log "github.com/siruspen/logrus"
 
 	"snipnet/internal/utils"
 	"snipnet/lib/types"
@@ -20,11 +19,11 @@ func Logger(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		next.ServeHTTP(w, r)
-		log.Infoln(r.Method, r.URL.Path, r.UserAgent(), time.Since(start))
+		slog.Info("REQUEST", slog.String("method", r.Method), slog.String("endpoint", r.URL.Path), slog.String("client", r.UserAgent()), slog.Any("duration", time.Since(start)))
 	})
 }
 
-func IsAuthenticated(next func(http.ResponseWriter, *http.Request), log *logrus.Logger, cache *redis.Client) func(http.ResponseWriter, *http.Request) {
+func IsAuthenticated(next func(http.ResponseWriter, *http.Request), log *slog.Logger, cache *redis.Client) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		auth := r.Header.Get("Authorization")
 		if !strings.HasPrefix(auth, "Bearer ") {

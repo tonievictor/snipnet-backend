@@ -3,12 +3,12 @@ package controllers
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/mail"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/redis/go-redis/v9"
-	"github.com/siruspen/logrus"
 	"golang.org/x/crypto/bcrypt"
 
 	"snipnet/internal/utils"
@@ -18,11 +18,11 @@ import (
 
 type UserController struct {
 	users services.UserStore
-	log   *logrus.Logger
+	log   *slog.Logger
 	cache *redis.Client
 }
 
-func NewUserController(users services.UserStore, log *logrus.Logger, rds *redis.Client) *UserController {
+func NewUserController(users services.UserStore, log *slog.Logger, rds *redis.Client) *UserController {
 	return &UserController{
 		users: users,
 		log:   log,

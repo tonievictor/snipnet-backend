@@ -3,12 +3,12 @@ package controllers
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
-	"github.com/siruspen/logrus"
 
 	"snipnet/internal/utils"
 	"snipnet/lib/services"
@@ -17,11 +17,11 @@ import (
 
 type SnippetController struct {
 	snippets services.SnippetStore
-	log      *logrus.Logger
+	log      *slog.Logger
 	cache    *redis.Client
 }
 
-func NewSnippetController(snippet services.SnippetStore, log *logrus.Logger, cache *redis.Client) *SnippetController {
+func NewSnippetController(snippet services.SnippetStore, log *slog.Logger, cache *redis.Client) *SnippetController {
 	return &SnippetController{
 		snippets: snippet,
 		log:      log,
@@ -149,12 +149,29 @@ func (s *SnippetController) GetAllUserSnippets(w http.ResponseWriter, r *http.Re
 	return
 }
 
+func (s *SnippetController) GetAllCurrentUserSnippets(w http.ResponseWriter, r *http.Request) {
+	session := r.Context().Value(types.AuthSession).(types.Session)
+	snippets, err := s.snippets.GetSnippetsUser(session.UserID)
+	if err != nil {
+		utils.WriteErr(w, http.StatusNotFound, "Error fetching snippets", err, s.log)
+		return
+	}
+	utils.WriteRes(w, http.StatusOK, "User's snippets found", snippets, s.log)
+	return
+}
+
 func (s *SnippetController) GetAllSnippets(w http.ResponseWriter, r *http.Request) {
 	snippets, err := s.snippets.GetSnippets()
 	if err != nil {
 		utils.WriteErr(w, http.StatusNotFound, "Error fetching snippets", err, s.log)
 		return
 	}
+
+	if len(*snippets) == 0 {
+		utils.WriteErr(w, http.StatusNotFound, "No Snippets found", errors.New(""), s.log)
+		return
+	}
+
 	utils.WriteRes(w, http.StatusOK, "Snippets found", snippets, s.log)
 	return
 }
@@ -173,6 +190,7 @@ func (s *SnippetController) GetSnippetByID(w http.ResponseWriter, r *http.Reques
 
 func (s *SnippetController) CreateSnippet(w http.ResponseWriter, r *http.Request) {
 	session := r.Context().Value(types.AuthSession).(types.Session)
+
 	var body services.Snippet
 
 	err := utils.ParseJson(r, &body)

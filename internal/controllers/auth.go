@@ -9,10 +9,11 @@ import (
 	"strings"
 	"time"
 
+	"log/slog"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
-	"github.com/siruspen/logrus"
 	"golang.org/x/crypto/bcrypt"
 
 	"snipnet/internal/utils"
@@ -33,11 +34,11 @@ var ctx = context.Background()
 
 type AuthController struct {
 	users services.UserStore
-	log   *logrus.Logger
+	log   *slog.Logger
 	cache *redis.Client
 }
 
-func NewAuthController(users services.UserStore, log *logrus.Logger, rds *redis.Client) *AuthController {
+func NewAuthController(users services.UserStore, log *slog.Logger, rds *redis.Client) *AuthController {
 	return &AuthController{
 		users: users,
 		log:   log,

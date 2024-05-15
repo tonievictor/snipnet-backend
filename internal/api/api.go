@@ -2,12 +2,13 @@ package api
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
-	log "github.com/siruspen/logrus"
+	"github.com/rs/cors"
 
 	"snipnet/lib/middleware"
 )
@@ -24,20 +25,31 @@ func New(port string) *APIServer {
 }
 
 func (a *APIServer) Init(router *http.ServeMux) {
+	c := cors.New(cors.Options{
+		// This should be updated to handle only req from authorized client
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
+		AllowCredentials: true,
+		// Consider disabling in production
+		Debug: true,
+	})
+
+	handler := c.Handler(router)
+
 	server := http.Server{
 		Addr:         a.address,
-		Handler:      middleware.Logger(router),
+		Handler:      middleware.Logger(handler),
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,
 	}
 
-	log.Infof("Starting server on port %s...\n", a.address)
+	slog.Info("API", slog.String("Server runnning on", a.address))
 
 	go func() {
 		err := server.ListenAndServe()
 		if err != nil {
-			log.Fatal(err)
+			slog.Error("API", slog.String("error", err.Error()))
 			return
 		}
 	}()
@@ -48,7 +60,7 @@ func (a *APIServer) Init(router *http.ServeMux) {
 
 	sig := <-sigchan
 
-	log.Info("Graceful shutdown: received ", sig)
+	slog.Info("API", slog.String("Graceful shutdown: received %v\n", sig.String()))
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	cancel()

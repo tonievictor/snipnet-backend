@@ -3,11 +3,11 @@ package utils
 import (
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
-	"github.com/siruspen/logrus"
 )
 
 type Response struct {
@@ -29,25 +29,25 @@ func ParseJson(r *http.Request, payload interface{}) error {
 
 var Validate = validator.New()
 
-func WriteErr(w http.ResponseWriter, status_code int, message string, err error, log *logrus.Logger) {
-	log.WithFields(logrus.Fields{"error": err}).Error(message)
+func WriteErr(w http.ResponseWriter, status_code int, message string, err error, log *slog.Logger) {
+	log.Error("RESPONSE", slog.String("error", err.Error()))
 	res := create_res(false, message, err.Error())
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status_code)
 	encode_err := json.NewEncoder(w).Encode(res)
 	if encode_err != nil {
-		log.Errorf("Error sending response to user: %v\n", encode_err)
+		log.Error("RESPONSE", slog.String("Error sending response to user:", encode_err.Error()))
 	}
 }
 
-func WriteRes(w http.ResponseWriter, status_code int, message string, data interface{}, log *logrus.Logger) {
-	log.Info(message)
+func WriteRes(w http.ResponseWriter, status_code int, message string, data interface{}, log *slog.Logger) {
+	log.Info("RESPONSE", slog.String("message", message))
 	res := create_res(true, message, data)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status_code)
 	encode_err := json.NewEncoder(w).Encode(res)
 	if encode_err != nil {
-		log.Errorf("Error sending response to user: %v\n", encode_err)
+		log.Error("RESPONSE", slog.String("Error sending response to user:", encode_err.Error()))
 	}
 }
 

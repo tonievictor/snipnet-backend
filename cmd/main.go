@@ -1,10 +1,10 @@
 package main
 
 import (
+	log "log/slog"
 	"os"
 
 	_ "github.com/lib/pq"
-	log "github.com/siruspen/logrus"
 	"github.com/tonie-ng/go-dotenv"
 
 	"snipnet/internal/api"
@@ -18,7 +18,7 @@ func main() {
 	db, err := database.Init("postgres", os.Getenv("DB_CONN_STRING"))
 	defer db.Close()
 	if err != nil {
-		log.Fatalf("Error connecting to database %v", err)
+		log.Error("API", "Error connecting to database %v", err)
 		return
 	}
 
