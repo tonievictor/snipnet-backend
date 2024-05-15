@@ -13,6 +13,12 @@ SnipNet is a versatile code snippet management application. Currently, it provid
 - Enhanced collaboration features
 - Integration with other development tools
 
+## Prerequisites
+Before you begin, ensure you have the following installed:
+- Go version 1.22.0 or higher
+- Docker
+- Linux environment (Ubuntu, CentOS, etc.)
+
 ## Installation
 To install SnipNet, follow these steps:
 - Clone this repository:
@@ -35,7 +41,7 @@ DB_NAME=
 DB_PASSWORD=
 DB_PORT=
 DB_HOST=
-DB_CONN_STRING="postgres://postgres:password@localhost:5432/testdb?sslmode=disable"
+DB_CONN_STRING="your connection string"
 REDIS_URL=
 ```
 - Optionally, setup the database (optional because you might choose another database config)
@@ -52,6 +58,7 @@ go run main.go
 ## Usage
 ### Terminal Interface
 To use SnipNet via the terminal interface, execute the following command:
+> Ensure that the backend is running already.
 ```
 ./snipnet.sh
 ```
