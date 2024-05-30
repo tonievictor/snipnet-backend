@@ -23,7 +23,7 @@ func Logger(next http.Handler) http.Handler {
 	})
 }
 
-func IsAuthenticated(next func(http.ResponseWriter, *http.Request), log *slog.Logger, cache *redis.Client) func(http.ResponseWriter, *http.Request) {
+func IsAuthenticated(next http.HandlerFunc, log *slog.Logger, cache *redis.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		auth := r.Header.Get("Authorization")
 		if !strings.HasPrefix(auth, "Bearer ") {

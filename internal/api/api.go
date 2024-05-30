@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -26,18 +27,15 @@ func New(port string) *APIServer {
 
 func (a *APIServer) Init(router *http.ServeMux) {
 	c := cors.New(cors.Options{
-		// This should be updated to handle only req from authorized client
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
 		AllowCredentials: true,
-		// Consider disabling in production
-		Debug: true,
+		Debug:            true,
 	})
-
 	handler := c.Handler(router)
 
 	server := http.Server{
-		Addr:         a.address,
+		Addr:         fmt.Sprintf(":%s", a.address),
 		Handler:      middleware.Logger(handler),
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  5 * time.Second,
@@ -45,7 +43,6 @@ func (a *APIServer) Init(router *http.ServeMux) {
 	}
 
 	slog.Info("API", slog.String("Server runnning on", a.address))
-
 	go func() {
 		err := server.ListenAndServe()
 		if err != nil {
@@ -57,11 +54,9 @@ func (a *APIServer) Init(router *http.ServeMux) {
 	sigchan := make(chan os.Signal)
 	signal.Notify(sigchan, os.Interrupt)
 	signal.Notify(sigchan, os.Kill)
-
 	sig := <-sigchan
 
 	slog.Info("API", slog.String("Graceful shutdown: received %v\n", sig.String()))
-
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	cancel()
 	server.Shutdown(ctx)
