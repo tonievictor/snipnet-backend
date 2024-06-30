@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	log "log/slog"
 	"os"
 
@@ -15,7 +16,9 @@ import (
 
 func main() {
 	dotenv.Config("../.env")
-	db, err := database.Init("postgres", os.Getenv("DB_CONN_STRING"))
+	dbconnstr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=disable", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
+	db, err := database.Init("postgres", dbconnstr)
+
 	defer db.Close()
 	if err != nil {
 		log.Error("API", "Error connecting to database %v", err)

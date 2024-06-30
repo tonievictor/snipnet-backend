@@ -14,7 +14,7 @@ import (
 func Routes() *http.ServeMux {
 	router := http.NewServeMux()
 	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
-	rds := cache.Init(os.Getenv("REDIS_CLIENT"))
+	rds := cache.Init()
 
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
