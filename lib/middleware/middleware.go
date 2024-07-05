@@ -39,7 +39,7 @@ func IsAuthenticated(next http.HandlerFunc, log *slog.Logger, cache *redis.Clien
 
 		val, err := cache.Get(context.Background(), token).Result()
 		if err == redis.Nil || err != nil {
-			utils.WriteErr(w, http.StatusUnauthorized, "Invalid session token", err, log)
+			utils.WriteErr(w, http.StatusUnauthorized, "Invalid session token", errors.New(""), log)
 			return
 		}
 		var session types.Session

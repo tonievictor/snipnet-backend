@@ -10,8 +10,8 @@ services:
     networks:
       - nestnetwork
     depends_on:
-      - nest.db
-      - nest.redis
+      - "nest.db"
+      - "nest.redis"
     restart: on-failure
     ports:
       - 8080:8080
