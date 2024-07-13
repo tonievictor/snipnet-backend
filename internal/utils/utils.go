@@ -36,7 +36,7 @@ func WriteErr(w http.ResponseWriter, status_code int, message string, err error,
 	w.WriteHeader(status_code)
 	encode_err := json.NewEncoder(w).Encode(res)
 	if encode_err != nil {
-		log.Error("RESPONSE", slog.String("Error sending response to user:", encode_err.Error()))
+		log.Error("[RESPONSE]", slog.String("Error sending response to user:", encode_err.Error()))
 	}
 }
 
@@ -47,7 +47,7 @@ func WriteRes(w http.ResponseWriter, status_code int, message string, data inter
 	w.WriteHeader(status_code)
 	encode_err := json.NewEncoder(w).Encode(res)
 	if encode_err != nil {
-		log.Error("RESPONSE", slog.String("Error sending response to user:", encode_err.Error()))
+		log.Error("[RESPONSE]", slog.String("Error sending response to user:", encode_err.Error()))
 	}
 }
 

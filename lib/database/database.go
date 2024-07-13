@@ -54,10 +54,13 @@ func tables() string {
 			description TEXT NOT NULL DEFAULT '',
 			language VARCHAR(20) NOT NULL DEFAULT '',
 			code TEXT NOT NULL DEFAULT '',
+			document tsvector GENERATED ALWAYS AS (to_tsvector('english', title || ' ' || description || ' ' || code)) STORED,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY (user_id) REFERENCES users (id)
 		);
+		
+		CREATE INDEX document_idx ON snippets USING GIN(document);
 	`
 	return query
 }

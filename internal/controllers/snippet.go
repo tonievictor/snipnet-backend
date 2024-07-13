@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
@@ -40,7 +41,8 @@ func (s *SnippetController) DeleteSnippet(w http.ResponseWriter, r *http.Request
 	}
 
 	if session.UserID != snippet.UserID {
-		utils.WriteErr(w, http.StatusUnauthorized, "You are not authorized to access this resource", errors.New("Not authorized"), s.log)
+		utils.WriteErr(w, http.StatusUnauthorized, `You are not authorized to access
+			this resource`, errors.New("Not authorized"), s.log)
 		return
 	}
 
@@ -78,7 +80,8 @@ func (s *SnippetController) UpdateSnippetMulti(w http.ResponseWriter, r *http.Re
 	}
 
 	if session.UserID != sp.UserID {
-		utils.WriteErr(w, http.StatusUnauthorized, "You are not authorized to access this resource", errors.New("Not authorized"), s.log)
+		utils.WriteErr(w, http.StatusUnauthorized, `You are not authorized to access
+			this resource`, errors.New("Not authorized"), s.log)
 		return
 	}
 
@@ -124,7 +127,7 @@ func (s *SnippetController) UpdateSnippetOne(w http.ResponseWriter, r *http.Requ
 	}
 
 	if body.Field != "title" && body.Field != "description" && body.Field != "code" {
-		utils.WriteErr(w, http.StatusBadRequest, "You can't updated that parameter", errors.New("Invalid field Value"), s.log)
+		utils.WriteErr(w, http.StatusBadRequest, "You can't update that parameter", errors.New("Invalid field Value"), s.log)
 		return
 	}
 
@@ -140,18 +143,18 @@ func (s *SnippetController) UpdateSnippetOne(w http.ResponseWriter, r *http.Requ
 
 func (s *SnippetController) GetAllUserSnippets(w http.ResponseWriter, r *http.Request) {
 	user_id := r.PathValue("userid")
-	snippets, err := s.snippets.GetSnippetsUser(user_id)
-	if err != nil {
-		utils.WriteErr(w, http.StatusNotFound, "Error fetching snippets", err, s.log)
-		return
+	query := r.URL.Query()
+	page := query.Get("page")
+	param := query.Get("param")
+	lang := query.Get("lang")
+	var offset int
+	limit := 20
+	if p, err := strconv.Atoi(page); err != nil && p <= 0 {
+		offset = 0
+	} else {
+		offset = (p - 1) * limit
 	}
-	utils.WriteRes(w, http.StatusOK, "User's snippets found", snippets, s.log)
-	return
-}
-
-func (s *SnippetController) GetAllCurrentUserSnippets(w http.ResponseWriter, r *http.Request) {
-	session := r.Context().Value(types.AuthSession).(types.Session)
-	snippets, err := s.snippets.GetSnippetsUser(session.UserID)
+	snippets, err := s.snippets.GetSnippetsUser(user_id, offset, limit, param, lang)
 	if err != nil {
 		utils.WriteErr(w, http.StatusNotFound, "Error fetching snippets", err, s.log)
 		return
@@ -161,7 +164,18 @@ func (s *SnippetController) GetAllCurrentUserSnippets(w http.ResponseWriter, r *
 }
 
 func (s *SnippetController) GetAllSnippets(w http.ResponseWriter, r *http.Request) {
-	snippets, err := s.snippets.GetSnippets()
+	query := r.URL.Query()
+	page := query.Get("page")
+	param := query.Get("param")
+	lang := query.Get("lang")
+	var offset int
+	limit := 20
+	if p, err := strconv.Atoi(page); err != nil && p <= 0 {
+		offset = 0
+	} else {
+		offset = (p - 1) * limit
+	}
+	snippets, err := s.snippets.GetSnippets(offset, limit, param, lang)
 	if err != nil {
 		utils.WriteErr(w, http.StatusNotFound, "Error fetching snippets", err, s.log)
 		return
