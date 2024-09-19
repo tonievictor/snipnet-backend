@@ -16,6 +16,7 @@ type SnippetWithUser struct {
 	Description string    `json:"description" validate:"required"`
 	Language    string    `json:"language" validate:"required"`
 	Code        string    `json:"code" validate:"required"`
+	IsPublic     string    `json:"is_public" validate:"type=bool"`
 	Username    string    `json:"username" validate:"required"`
 	Email       string    `json:"email" validate:"required,email"`
 	CreatedAt   time.Time `json:"created_at"`

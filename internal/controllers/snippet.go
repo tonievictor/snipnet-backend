@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-playground/validator/v10"
+	validator "github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
-	"github.com/redis/go-redis/v9"
+	redis "github.com/redis/go-redis/v9"
 
 	"snipnet/internal/utils"
 	"snipnet/lib/services"
@@ -28,6 +28,28 @@ func NewSnippetController(snippet services.SnippetStore, log *slog.Logger, cache
 		log:      log,
 		cache:    cache,
 	}
+}
+
+/*
+	This function concatenates multiple req params together using ' & '
+	It trims white space around the string and gets rid of repeating spaces within the string
+*/
+func concatParam(s string) string {
+	newStr := make([]byte, 0, len(s))
+	sLen := len(s)
+	for i := 0; i < sLen; i++ {
+		if s[i] == ' ' {
+			if i != (sLen-1) && s[i+1] != ' ' && len(newStr) > 0 {
+				newStr = append(newStr, s[i])
+				newStr = append(newStr, '&')
+				newStr = append(newStr, s[i])
+			}
+			continue
+		}
+		newStr = append(newStr, s[i])
+
+	}
+	return string(newStr)
 }
 
 func (s *SnippetController) DeleteSnippet(w http.ResponseWriter, r *http.Request) {
@@ -146,6 +168,7 @@ func (s *SnippetController) GetAllUserSnippets(w http.ResponseWriter, r *http.Re
 	query := r.URL.Query()
 	page := query.Get("page")
 	param := query.Get("param")
+	param = concatParam(param)
 	lang := query.Get("lang")
 	var offset int
 	limit := 20
@@ -167,6 +190,7 @@ func (s *SnippetController) GetAllSnippets(w http.ResponseWriter, r *http.Reques
 	query := r.URL.Query()
 	page := query.Get("page")
 	param := query.Get("param")
+	param = concatParam(param)
 	lang := query.Get("lang")
 	var offset int
 	limit := 20

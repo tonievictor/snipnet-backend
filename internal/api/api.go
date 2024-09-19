@@ -51,7 +51,7 @@ func (a *APIServer) Init(router *http.ServeMux) {
 		}
 	}()
 
-	sigchan := make(chan os.Signal)
+	sigchan := make(chan os.Signal, 1)
 	signal.Notify(sigchan, os.Interrupt)
 	signal.Notify(sigchan, os.Kill)
 	sig := <-sigchan

@@ -55,12 +55,13 @@ func tables() string {
 			language VARCHAR(20) NOT NULL DEFAULT '',
 			code TEXT NOT NULL DEFAULT '',
 			document tsvector GENERATED ALWAYS AS (to_tsvector('english', title || ' ' || description || ' ' || code)) STORED,
+			is_public BOOLEAN NOT NULL DEFAULT TRUE,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY (user_id) REFERENCES users (id)
 		);
 		
-		CREATE INDEX document_idx ON snippets USING GIN(document);
+		CREATE INDEX IF NOT EXISTS document_idx ON snippets USING GIN(document);
 	`
 	return query
 }
