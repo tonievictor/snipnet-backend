@@ -7,11 +7,6 @@ services:
       dockerfile: ./Dockerfile
     container_name: nest.api
     env_file: ".env"
-    develop:
-      watch:
-        - action: sync
-          path: ./
-          target: /usr/src/app/
     networks:
       - nestnetwork
     depends_on:

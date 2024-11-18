@@ -15,6 +15,5 @@ func Init() *redis.Client {
 		Password: "", 
 		DB:       0,
 	})
-
 	return rdb
 }

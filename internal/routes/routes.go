@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 
+	"golang.org/x/oauth2"
+
 	"snipnet/internal/controllers"
 	"snipnet/lib/cache"
 	"snipnet/lib/middleware"
@@ -15,6 +17,16 @@ func Routes() *http.ServeMux {
 	router := http.NewServeMux()
 	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
 	rds := cache.Init()
+	oauthConfig := oauth2.Config{
+		ClientID:     os.Getenv("GH_CLIENT_ID"),
+		ClientSecret: os.Getenv("GH_CLIENT_SECRET"),
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  "https://github.com/login/oauth/authorize",
+			TokenURL: "https://github.com/login/oauth/access_token",
+		},
+		RedirectURL: "http://localhost:8080/signin",
+		Scopes:      []string{"user"},
+	}
 
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -23,9 +35,8 @@ func Routes() *http.ServeMux {
 	})
 
 	users := services.User{}
-	auth_controller := controllers.NewAuthController(&users, logger, rds)
-	router.HandleFunc("POST /signup", auth_controller.Signup)
-	router.HandleFunc("POST /signin", auth_controller.Signin)
+	auth_controller := controllers.NewAuthController(&users, &oauthConfig, logger, rds)
+	router.HandleFunc("GET /signin", auth_controller.GitHubOauth)
 	router.HandleFunc("POST /signout", middleware.IsAuthenticated(auth_controller.Signout, logger, rds))
 
 	snippets := services.Snippet{}
@@ -41,8 +52,5 @@ func Routes() *http.ServeMux {
 	router.HandleFunc("GET /users", middleware.IsAuthenticated(user_controller.GetUsers, logger, rds))
 	router.HandleFunc("GET /users/{id}", middleware.IsAuthenticated(user_controller.GetUserByID, logger, rds))
 	router.HandleFunc("GET /users/{id}/snippets", middleware.IsAuthenticated(snippet_controller.GetAllUserSnippets, logger, rds))
-	router.HandleFunc("PATCH /users/{id}", middleware.IsAuthenticated(user_controller.UpdateUserOne, logger, rds))
-	router.HandleFunc("PUT /users/{id}", middleware.IsAuthenticated(user_controller.UpdateUserMulti, logger, rds))
-	router.HandleFunc("DELETE /users/{id}", middleware.IsAuthenticated(user_controller.DeleteUser, logger, rds))
 	return router
 }
