@@ -80,13 +80,13 @@ func (a *AuthController) createSession(userId string) (string, error) {
 		UserID:     userId,
 		SessionID:  session_id,
 		CreatedAt:  time.Now(),
-		ExpiryTime: time.Now().Add(time.Hour * 24 * 3),
+		ExpiryTime: time.Now().Add(time.Hour * 24 * 30),
 	})
 	if err != nil {
 		return "", err
 	}
 
-	err = a.cache.Set(ctx, session_id, session, time.Second*259200).Err()
+	err = a.cache.Set(ctx, session_id, session, time.Second*2592000).Err()
 	if err != nil {
 		return "", err
 	}
