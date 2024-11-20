@@ -25,7 +25,7 @@ type Snippet struct {
 	Description string    `json:"description" validate:"required"`
 	Language    string    `json:"language" validate:"required"`
 	Code        string    `json:"code" validate:"required"`
-	IsPublic     string   `json:"is_public" validate:"boolean"`
+	IsPublic    string    `json:"is_public" validate:"boolean"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
@@ -37,7 +37,7 @@ func (s *Snippet) GetSnippetsUser(user_id string, offset, limit int, param, lang
 
 	query := `
 		SELECT snippets.id, snippets.user_id, snippets.title, snippets.description,
-			snippets.language, snippets.code, snippets.is_public, users.username, users.email,
+			snippets.language, snippets.code, snippets.is_public, users.username, users.email, users.avatar,
 			snippets.created_at, snippets.updated_at
 		FROM snippets
 		INNER JOIN users ON snippets.user_id = users.id
@@ -67,6 +67,7 @@ func (s *Snippet) GetSnippetsUser(user_id string, offset, limit int, param, lang
 			&snippet.IsPublic,
 			&snippet.Username,
 			&snippet.Email,
+			&snippet.Avatar,
 			&snippet.CreatedAt,
 			&snippet.UpdatedAt,
 		)
@@ -87,7 +88,7 @@ func (s *Snippet) GetSnippets(offset, limit int, param, lang string) (*[]*types.
 
 	query := `
 		SELECT snippets.id, snippets.user_id, snippets.title, snippets.description,
-			snippets.language, snippets.code, snippets.is_public, users.username, users.email,
+			snippets.language, snippets.code, snippets.is_public, users.username, users.email, users.avatar,
 			snippets.created_at, snippets.updated_at
 		FROM snippets
 		INNER JOIN users ON snippets.user_id = users.id
@@ -116,6 +117,7 @@ func (s *Snippet) GetSnippets(offset, limit int, param, lang string) (*[]*types.
 			&snippet.IsPublic,
 			&snippet.Username,
 			&snippet.Email,
+			&snippet.Avatar,
 			&snippet.CreatedAt,
 			&snippet.UpdatedAt,
 		)
@@ -136,7 +138,7 @@ func (s *Snippet) GetSnippet(id string) (*types.SnippetWithUser, error) {
 
 	query := `
 		SELECT snippets.id, snippets.user_id, snippets.title, snippets.description,
-			snippets.language, snippets.code, snippets.is_public, users.username, users.email,
+			snippets.language, snippets.code, snippets.is_public, users.username, users.email, users.avatar,
 			snippets.created_at, snippets.updated_at
 		FROM snippets
 		INNER JOIN users ON snippets.user_id = users.id
@@ -155,6 +157,7 @@ func (s *Snippet) GetSnippet(id string) (*types.SnippetWithUser, error) {
 		&snippet.IsPublic,
 		&snippet.Username,
 		&snippet.Email,
+		&snippet.Avatar,
 		&snippet.CreatedAt,
 		&snippet.UpdatedAt,
 	)

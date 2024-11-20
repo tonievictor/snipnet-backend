@@ -22,7 +22,11 @@ type SnippetController struct {
 	cache    *redis.Client
 }
 
-func NewSnippetController(snippet services.SnippetStore, log *slog.Logger, cache *redis.Client) *SnippetController {
+func NewSnippetController(
+	snippet services.SnippetStore,
+	log *slog.Logger,
+	cache *redis.Client,
+) *SnippetController {
 	return &SnippetController{
 		snippets: snippet,
 		log:      log,
@@ -31,8 +35,8 @@ func NewSnippetController(snippet services.SnippetStore, log *slog.Logger, cache
 }
 
 /*
-	This function concatenates multiple req params together using ' & '
-	It trims white space around the string and gets rid of repeating spaces within the string
+This function concatenates multiple req params together using ' & '
+It trims white space around the string and gets rid of repeating spaces within the string
 */
 func concatParam(s string) string {
 	newStr := make([]byte, 0, len(s))
@@ -70,7 +74,12 @@ func (s *SnippetController) DeleteSnippet(w http.ResponseWriter, r *http.Request
 
 	err = s.snippets.DeleteSnippet(id)
 	if err != nil {
-		utils.WriteErr(w, http.StatusInternalServerError, "An error occured while deleting snippet", err, s.log)
+		utils.WriteErr(
+			w, http.StatusInternalServerError,
+			"An error occured while deleting snippet",
+			err,
+			s.log
+		)
 		return
 	}
 
@@ -139,23 +148,47 @@ func (s *SnippetController) UpdateSnippetOne(w http.ResponseWriter, r *http.Requ
 
 	sp, err := s.snippets.GetSnippet(id)
 	if err != nil {
-		utils.WriteErr(w, http.StatusNotFound, fmt.Sprintf("Snippet with %s not found", id), err, s.log)
+		utils.WriteErr(
+			w,
+			http.StatusNotFound,
+			fmt.Sprintf("Snippet with %s not found", id),
+			err,
+			s.log
+		)
 		return
 	}
 
 	if session.UserID != sp.UserID {
-		utils.WriteErr(w, http.StatusUnauthorized, "You are not authorized to access this resource", errors.New("Not authorized"), s.log)
+		utils.WriteErr(
+			w,
+			http.StatusUnauthorized,
+			"You are not authorized to access this resource",
+			errors.New("Not authorized"),
+			s.log
+		)
 		return
 	}
 
 	if body.Field != "title" && body.Field != "description" && body.Field != "code" {
-		utils.WriteErr(w, http.StatusBadRequest, "You can't update that parameter", errors.New("Invalid field Value"), s.log)
+		utils.WriteErr(
+			w,
+			http.StatusBadRequest,
+			"You can't update that parameter",
+			errors.New("Invalid field Value"),
+			s.log
+		)
 		return
 	}
 
 	snippet, err := s.snippets.UpdateSnippetSingle(id, body.Field, body.Value)
 	if err != nil {
-		utils.WriteErr(w, http.StatusBadRequest, "An error occured while updating the resource", err, s.log)
+		utils.WriteErr(
+			w,
+			http.StatusBadRequest,
+			"An error occured while updating the resource",
+			err,
+			s.log
+		)
 		return
 	}
 

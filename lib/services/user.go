@@ -77,7 +77,7 @@ func (u *User) CreateUser(id string, oauthUser *types.GHUser) (*User, error) {
 	var saveduser User
 
 	query := `
-		INSERT INTO users (id, username, oauthID, avatar, email, created_at, updated_at)
+		INSERT INTO users (id, username, oauth_id, avatar, email, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, avatar, username, email, created_at, updated_at;
 	`
 
@@ -126,62 +126,3 @@ func (u *User) GetUsers() (*[]*User, error) {
 	}
 	return &users, nil
 }
-
-// func (u *User) DeleteUser(id string) error {
-// 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
-// 	defer cancel()
-//
-// 	query := `DELETE FROM users WHERE id = $1;`
-//
-// 	_, err := db.ExecContext(ctx, query, id)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
-//
-// func (u *User) UpdateUserSingle(id, field, value string) (*User, error) {
-// 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
-// 	defer cancel()
-//
-// 	var user User
-//
-// 	query := fmt.Sprintf("UPDATE users SET %s = $1, updated_at = $2 WHERE id = $3 RETURNING id, username, email, created_at, updated_at", field)
-// 	row := db.QueryRowContext(ctx, query, value, time.Now(), id)
-//
-// 	err := row.Scan(
-// 		&user.ID,
-// 		&user.Username,
-// 		&user.Email,
-// 		&user.CreatedAt,
-// 		&user.UpdatedAt,
-// 	)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	return &user, err
-// }
-//
-// func (u *User) UpdateUserMulti(usr *User) (*User, error) {
-// 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
-// 	defer cancel()
-//
-// 	var user User
-//
-// 	query := "UPDATE users SET username = $1, email = $2,updated_at = $3 WHERE id = $4 RETURNING id, username, email, created_at, updated_at"
-// 	row := db.QueryRowContext(ctx, query, usr.Username, usr.Email, time.Now(), usr.ID)
-//
-// 	err := row.Scan(
-// 		&user.ID,
-// 		&user.Username,
-// 		&user.Email,
-// 		&user.CreatedAt,
-// 		&user.UpdatedAt,
-// 	)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	return &user, err
-// }

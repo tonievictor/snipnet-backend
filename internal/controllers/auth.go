@@ -30,7 +30,12 @@ type AuthController struct {
 	cache       *redis.Client
 }
 
-func NewAuthController(users services.UserStore, oauthConfig *oauth2.Config, log *slog.Logger, rds *redis.Client) *AuthController {
+func NewAuthController(
+	users services.UserStore,
+	oauthConfig *oauth2.Config,
+	log *slog.Logger,
+	rds *redis.Client,
+) *AuthController {
 	return &AuthController{
 		users:       users,
 		oauthConfig: oauthConfig,
@@ -53,19 +58,30 @@ func (a *AuthController) GitHubOauth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := a.users.GetUser("oauthID", string(ghUser.ID))
+	user, err := a.users.GetUser("oauth_id", string(ghUser.ID))
 	if err != nil {
 		id := uuid.NewString()
 		user, err = a.users.CreateUser(id, &ghUser)
 		if err != nil {
-			utils.WriteErr(w, http.StatusInternalServerError, "An error occured while creating the user", err, a.log)
+			utils.WriteErr(
+				w,
+				http.StatusInternalServerError,
+				"An error occured while creating the user resource",
+				err, a.log
+			)
 			return
 		}
 	}
 
 	session_id, err := a.createSession(user.ID)
 	if err != nil {
-		utils.WriteErr(w, http.StatusInternalServerError, "An error occured while creating a new session", err, a.log)
+		utils.WriteErr(
+			w,
+			http.StatusInternalServerError,
+			"An error occured while creating a new session",
+			err,
+			a.log
+		)
 		return
 	}
 

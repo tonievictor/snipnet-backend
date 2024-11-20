@@ -19,7 +19,13 @@ func Logger(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		next.ServeHTTP(w, r)
-		slog.Info("[REQUEST]", slog.String("method", r.Method), slog.String("endpoint", r.URL.Path), slog.String("client", r.UserAgent()), slog.Any("duration", time.Since(start)))
+		slog.Info(
+			"[REQUEST]",
+			slog.String("method", r.Method),
+			slog.String("endpoint", r.URL.Path),
+			slog.String("client", r.UserAgent()),
+			slog.Any("duration", time.Since(start))
+		)
 	})
 }
 
@@ -42,6 +48,7 @@ func IsAuthenticated(next http.HandlerFunc, log *slog.Logger, cache *redis.Clien
 			utils.WriteErr(w, http.StatusUnauthorized, "Invalid session token", errors.New(""), log)
 			return
 		}
+
 		var session types.Session
 
 		err = json.Unmarshal([]byte(val), &session)
