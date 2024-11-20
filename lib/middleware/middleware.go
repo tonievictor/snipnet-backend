@@ -24,7 +24,7 @@ func Logger(next http.Handler) http.Handler {
 			slog.String("method", r.Method),
 			slog.String("endpoint", r.URL.Path),
 			slog.String("client", r.UserAgent()),
-			slog.Any("duration", time.Since(start))
+			slog.Any("duration", time.Since(start)),
 		)
 	})
 }

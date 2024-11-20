@@ -78,7 +78,7 @@ func (s *SnippetController) DeleteSnippet(w http.ResponseWriter, r *http.Request
 			w, http.StatusInternalServerError,
 			"An error occured while deleting snippet",
 			err,
-			s.log
+			s.log,
 		)
 		return
 	}
@@ -153,7 +153,7 @@ func (s *SnippetController) UpdateSnippetOne(w http.ResponseWriter, r *http.Requ
 			http.StatusNotFound,
 			fmt.Sprintf("Snippet with %s not found", id),
 			err,
-			s.log
+			s.log,
 		)
 		return
 	}
@@ -164,7 +164,7 @@ func (s *SnippetController) UpdateSnippetOne(w http.ResponseWriter, r *http.Requ
 			http.StatusUnauthorized,
 			"You are not authorized to access this resource",
 			errors.New("Not authorized"),
-			s.log
+			s.log,
 		)
 		return
 	}
@@ -175,7 +175,7 @@ func (s *SnippetController) UpdateSnippetOne(w http.ResponseWriter, r *http.Requ
 			http.StatusBadRequest,
 			"You can't update that parameter",
 			errors.New("Invalid field Value"),
-			s.log
+			s.log,
 		)
 		return
 	}
@@ -187,7 +187,7 @@ func (s *SnippetController) UpdateSnippetOne(w http.ResponseWriter, r *http.Requ
 			http.StatusBadRequest,
 			"An error occured while updating the resource",
 			err,
-			s.log
+			s.log,
 		)
 		return
 	}

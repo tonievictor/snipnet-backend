@@ -67,7 +67,8 @@ func (a *AuthController) GitHubOauth(w http.ResponseWriter, r *http.Request) {
 				w,
 				http.StatusInternalServerError,
 				"An error occured while creating the user resource",
-				err, a.log
+				err,
+				a.log,
 			)
 			return
 		}
@@ -80,7 +81,7 @@ func (a *AuthController) GitHubOauth(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError,
 			"An error occured while creating a new session",
 			err,
-			a.log
+			a.log,
 		)
 		return
 	}

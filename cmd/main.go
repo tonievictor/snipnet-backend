@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	log "log/slog"
 	"os"
 
@@ -16,9 +15,7 @@ import (
 
 func main() {
 	dotenv.Config("../.env")
-	dbconnstr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=disable",
-		os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
+	dbconnstr := os.Getenv("DB_CONN_STRING")
 
 	db, err := database.Init("postgres", dbconnstr)
 
