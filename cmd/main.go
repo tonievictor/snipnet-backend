@@ -18,12 +18,11 @@ func main() {
 	dbconnstr := os.Getenv("DB_CONN_STRING")
 
 	db, err := database.Init("postgres", dbconnstr)
-
-	defer db.Close()
 	if err != nil {
 		log.Error("API", "Error connecting to database %v", err)
 		return
 	}
+	defer db.Close()
 
 	services.New(db)
 	router := routes.Routes()
