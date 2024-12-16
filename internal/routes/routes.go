@@ -24,7 +24,7 @@ func Routes() *http.ServeMux {
 			AuthURL:  "https://github.com/login/oauth/authorize",
 			TokenURL: "https://github.com/login/oauth/access_token",
 		},
-		RedirectURL: "http://localhost:8080/signin",
+		RedirectURL: "https://snipnet.onrender.com/signin",
 		Scopes:      []string{"user"},
 	}
 
