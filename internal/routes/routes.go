@@ -5,18 +5,17 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/redis/go-redis/v9"
 	"golang.org/x/oauth2"
 
 	"snipnet/internal/controllers"
-	"snipnet/lib/cache"
 	"snipnet/lib/middleware"
 	"snipnet/lib/services"
 )
 
-func Routes() *http.ServeMux {
+func Routes(rds *redis.Client) *http.ServeMux {
 	router := http.NewServeMux()
 	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
-	rds := cache.Init()
 	oauthConfig := oauth2.Config{
 		ClientID:     os.Getenv("GH_CLIENT_ID"),
 		ClientSecret: os.Getenv("GH_CLIENT_SECRET"),
@@ -24,7 +23,7 @@ func Routes() *http.ServeMux {
 			AuthURL:  "https://github.com/login/oauth/authorize",
 			TokenURL: "https://github.com/login/oauth/access_token",
 		},
-		RedirectURL: "https://snipnet.onrender.com/signin",
+		RedirectURL: os.Getenv("GH_REDIRECT_URL"),
 		Scopes:      []string{"user"},
 	}
 

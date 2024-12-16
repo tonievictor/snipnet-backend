@@ -9,6 +9,7 @@ import (
 
 	"snipnet/internal/api"
 	"snipnet/internal/routes"
+	"snipnet/lib/cache"
 	"snipnet/lib/database"
 	"snipnet/lib/services"
 )
@@ -25,7 +26,13 @@ func main() {
 	defer db.Close()
 
 	services.New(db)
-	router := routes.Routes()
+
+	rds, err := cache.Init()
+	if err != nil {
+		log.Error("API", "Error connecting to redis %v", err)
+		return
+	}
 	server := api.New(os.Getenv("PORT"))
+	router := routes.Routes(rds)
 	server.Init(router)
 }

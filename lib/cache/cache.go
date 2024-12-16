@@ -9,11 +9,12 @@ import (
 
 var ctx = context.Background()
 
-func Init() *redis.Client {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:    os.Getenv("REDIS_URL"),
-		Password: "", 
-		DB:       0,
-	})
-	return rdb
+func Init() (*redis.Client, error) {
+	opt, err := redis.ParseURL(os.Getenv("REDIS_URL"))
+	if err != nil {
+		return nil, err
+	}
+
+	rdb := redis.NewClient(opt)
+	return rdb, nil
 }
