@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -25,7 +26,7 @@ func New(port string) *APIServer {
 	return apiserver
 }
 
-func (a *APIServer) Init(router *http.ServeMux) {
+func (a *APIServer) Init(router http.Handler) {
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
@@ -43,21 +44,31 @@ func (a *APIServer) Init(router *http.ServeMux) {
 	}
 
 	slog.Info("API", slog.String("Server runnning on", a.address))
-	go func() {
-		err := server.ListenAndServe()
-		if err != nil {
-			slog.Error("API", slog.String("error", err.Error()))
-			return
-		}
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
+	defer stop()
+
+	otelShutDown, err := setupOTelSDK(ctx)
+	if err != nil {
+		return
+	}
+
+	defer func() {
+		err = errors.Join(err, otelShutDown(context.Background()))
 	}()
 
-	sigchan := make(chan os.Signal, 1)
-	signal.Notify(sigchan, os.Interrupt)
-	signal.Notify(sigchan, os.Kill)
-	sig := <-sigchan
+	serverErr := make(chan error, 1)
+	go func() {
+		serverErr <- server.ListenAndServe()
+	}()
 
-	slog.Info("API", slog.String("Graceful shutdown: received %v\n", sig.String()))
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	cancel()
-	server.Shutdown(ctx)
+	select {
+	case err = <-serverErr:
+		slog.Error("API", slog.String("error", err.Error()))
+		return
+	case <-ctx.Done():
+		slog.Info("API", slog.String("SHUTDOWN", "Graceful shutdown: received\n"))
+		stop()
+	}
+	err = server.Shutdown(context.Background())
+	return
 }
