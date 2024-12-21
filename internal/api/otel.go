@@ -83,8 +83,7 @@ func newTraceProvider() (*trace.TracerProvider, error) {
 
 	traceProvider := trace.NewTracerProvider(
 		trace.WithBatcher(traceExporter,
-			// Default is 5s. Set to 1s for demonstrative purposes.
-			trace.WithBatchTimeout(time.Second)),
+			trace.WithBatchTimeout(time.Second*5)),
 	)
 	return traceProvider, nil
 }

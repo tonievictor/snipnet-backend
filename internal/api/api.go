@@ -10,8 +10,6 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/rs/cors"
-
 	"snipnet/lib/middleware"
 )
 
@@ -27,17 +25,9 @@ func New(port string) *APIServer {
 }
 
 func (a *APIServer) Init(router http.Handler) {
-	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
-		AllowCredentials: true,
-		Debug:            true,
-	})
-	handler := c.Handler(router)
-
 	server := http.Server{
 		Addr:         fmt.Sprintf(":%s", a.address),
-		Handler:      middleware.Logger(handler),
+		Handler:      middleware.Logger(router),
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,

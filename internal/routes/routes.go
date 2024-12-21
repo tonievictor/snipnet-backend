@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/rs/cors"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"golang.org/x/oauth2"
 
@@ -20,6 +21,7 @@ func Routes(rds *redis.Client) http.Handler {
 		handler := otelhttp.WithRouteTag(pattern, http.HandlerFunc(handlerFunc))
 		mux.Handle(pattern, handler)
 	}
+
 	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
 	oauthConfig := oauth2.Config{
 		ClientID:     os.Getenv("GH_CLIENT_ID"),
@@ -56,7 +58,16 @@ func Routes(rds *redis.Client) http.Handler {
 	handleFunc("GET /users", middleware.IsAuthenticated(user_controller.GetUsers, logger, rds))
 	handleFunc("GET /users/{id}", middleware.IsAuthenticated(user_controller.GetUserByID, logger, rds))
 	handleFunc("GET /users/{id}/snippets", middleware.IsAuthenticated(snippet_controller.GetAllUserSnippets, logger, rds))
-	router := otelhttp.NewHandler(mux, "/")
+
+	// add cors
+	handler := otelhttp.NewHandler(mux, "/")
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
+		AllowCredentials: true,
+		Debug:            true,
+	})
+	router := c.Handler(handler)
 
 	return router
 }
