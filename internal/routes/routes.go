@@ -7,6 +7,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/cors"
+	"github.com/swaggo/http-swagger"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"golang.org/x/oauth2"
 
@@ -34,6 +35,8 @@ func Routes(rds *redis.Client) http.Handler {
 		Scopes:      []string{"user"},
 	}
 
+	// swagger
+	handleFunc("GET /swagger/*", httpSwagger.Handler())
 	handleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)

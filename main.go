@@ -7,6 +7,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/tonie-ng/go-dotenv"
 
+	"snipnet/docs"
 	"snipnet/internal/api"
 	"snipnet/internal/routes"
 	"snipnet/lib/cache"
@@ -15,7 +16,14 @@ import (
 )
 
 func main() {
-	dotenv.Config("../.env")
+	docs.SwaggerInfo.Title = "Snipnet API 23"
+	docs.SwaggerInfo.Description = "This is api for snipnet; a code snippet store"
+	docs.SwaggerInfo.Version = "0.1"
+	docs.SwaggerInfo.Host = "snipnet.swagger.io"
+	docs.SwaggerInfo.BasePath = "/"
+	docs.SwaggerInfo.Schemes = []string{"http"}
+
+	dotenv.Config(".env")
 	dbconnstr := os.Getenv("DB_CONN_STRING")
 
 	db, err := database.Init("postgres", dbconnstr)
