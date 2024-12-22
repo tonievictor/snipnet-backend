@@ -16,12 +16,12 @@ import (
 )
 
 func main() {
-	docs.SwaggerInfo.Title = "Snipnet API 23"
-	docs.SwaggerInfo.Description = "This is api for snipnet; a code snippet store"
+	docs.SwaggerInfo.Title = "Snipnet API"
+	docs.SwaggerInfo.Description = "API for Snipnet, a code snippet storage and sharing platform."
 	docs.SwaggerInfo.Version = "0.1"
-	docs.SwaggerInfo.Host = "snipnet.swagger.io"
+	docs.SwaggerInfo.Host = "localhost:8080" // hardcoded for now.
 	docs.SwaggerInfo.BasePath = "/"
-	docs.SwaggerInfo.Schemes = []string{"http"}
+	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 
 	dotenv.Config(".env")
 	dbconnstr := os.Getenv("DB_CONN_STRING")

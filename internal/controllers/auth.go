@@ -44,6 +44,16 @@ func NewAuthController(
 	}
 }
 
+// @Summary      Sign In
+// @Description  Sign in using GitHub OAuth. Exchange the authorization code for a user session.
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        code  query    string  true  "Authorization code from the OAuth session"
+// @Success      200   {object} services.User       "Authenticated user details"
+// @Failure      400   {object} utils.Response      "Invalid or missing authorization code"
+// @Failure      500   {object} utils.Response      "Internal server error"
+// @Router       /signin [post]
 func (a *AuthController) GitHubOauth(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
 	token, err := a.oauthConfig.Exchange(r.Context(), code)
@@ -103,7 +113,7 @@ func (a *AuthController) createSession(userId string) (string, error) {
 		return "", err
 	}
 
-	err = a.cache.Set(ctx, session_id, session, time.Second * 640800).Err()
+	err = a.cache.Set(ctx, session_id, session, time.Second*640800).Err()
 	if err != nil {
 		return "", err
 	}
@@ -138,7 +148,15 @@ func fetchGHUser(accessToken string) (types.GHUser, error) {
 	return respBody, nil
 }
 
-// Sign out
+// @Summary      Sign Out
+// @Description  Terminate the user session and invalidate the API key.
+// @Tags         auth
+// @Security     ApiKeyAuth
+// @Param        Authorization  header  string  true  "Bearer token for authentication"
+// @Success      200  {object}  utils.Response  "Successful sign-out confirmation"
+// @Failure      401  {object}  utils.Response  "Unauthorized or invalid token"
+// @Failure      500  {object}  utils.Response  "Internal server error"
+// @Router       /signout [post]
 func (a *AuthController) Signout(w http.ResponseWriter, r *http.Request) {
 	session := r.Context().Value(types.AuthSession).(types.Session)
 	err := a.cache.Del(ctx, session.SessionID).Err()

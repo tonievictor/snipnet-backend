@@ -3,5 +3,636 @@
     "info": {
         "contact": {}
     },
-    "paths": {}
+    "paths": {
+        "/signin": {
+            "post": {
+                "description": "Sign in using GitHub OAuth. Exchange the authorization code for a user session.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Sign In",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization code from the OAuth session",
+                        "name": "code",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Authenticated user details",
+                        "schema": {
+                            "$ref": "#/definitions/services.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or missing authorization code",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/signout": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Terminate the user session and invalidate the API key.",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Sign Out",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token for authentication",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful sign-out confirmation",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized or invalid token",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/snippets": {
+            "get": {
+                "description": "Retrieve all snippets, with optional filters.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "snippet",
+                    "snippet"
+                ],
+                "summary": "Get Snippets",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter snippets by a specific string",
+                        "name": "param",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Page number, e.g., 0, 1, 2, ...",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Programming language to filter snippets",
+                        "name": "lang",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of snippets with user details",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/types.SnippetWithUser"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create a new snippet.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "snippet"
+                ],
+                "summary": "Create Snippet",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token for authentication",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created snippet details with user information",
+                        "schema": {
+                            "$ref": "#/definitions/types.SnippetWithUser"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/snippets/{id}": {
+            "get": {
+                "description": "Retrieve a snippet by its unique ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "snippet"
+                ],
+                "summary": "Get Snippet",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Unique identifier for the snippet",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Snippet details along with user information",
+                        "schema": {
+                            "$ref": "#/definitions/types.SnippetWithUser"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update a single field of a snippet, such as the title, description, or code.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "snippet"
+                ],
+                "summary": "Update Snippet",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Snippet ID to be updated",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Field and value to update",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.UpdateOneData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated Snippet details",
+                        "schema": {
+                            "$ref": "#/definitions/types.SnippetWithUser"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request or missing parameters",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized access",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Snippet not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete a snippet by its ID. Only the snippet owner can perform this action.",
+                "tags": [
+                    "snippet"
+                ],
+                "summary": "Delete Snippet",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Snippet ID to be deleted",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Snippet successfully deleted, no content returned"
+                    },
+                    "401": {
+                        "description": "Unauthorized access",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Snippet not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error during deletion",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update multiple fields of a snippet, such as title, description, and code.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "snippet"
+                ],
+                "summary": "Update Snippet Fields",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Snippet ID to be updated",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated snippet data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.Snippet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated Snippet details",
+                        "schema": {
+                            "$ref": "#/definitions/types.SnippetWithUser"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request or missing parameters",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized access",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Snippet not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error during update",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "description": "Retrieve details of a specific user by their unique ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get User",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Unique ID of the user",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User details",
+                        "schema": {
+                            "$ref": "#/definitions/services.User"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized access",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{userid}/snippets": {
+            "get": {
+                "description": "Retrieve all snippets created by a specific user, with optional filters.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "snippet"
+                ],
+                "summary": "Get User's Snippets",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID whose snippets are being retrieved",
+                        "name": "userid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Page number for pagination (e.g., 1, 2, 3, ...)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search parameter to filter snippets",
+                        "name": "param",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Programming language to filter snippets",
+                        "name": "lang",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of snippets with user details",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/utils.Response"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Error fetching snippets",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "services.Snippet": {
+            "type": "object",
+            "required": [
+                "code",
+                "description",
+                "language",
+                "title"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_public": {
+                    "type": "string"
+                },
+                "language": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "services.User": {
+            "type": "object",
+            "required": [
+                "email",
+                "username"
+            ],
+            "properties": {
+                "auth_token": {
+                    "type": "string"
+                },
+                "avatar": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.SnippetWithUser": {
+            "type": "object",
+            "required": [
+                "code",
+                "description",
+                "email",
+                "language",
+                "title",
+                "username"
+            ],
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_public": {
+                    "type": "string"
+                },
+                "language": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.UpdateOneData": {
+            "type": "object",
+            "required": [
+                "field",
+                "value"
+            ],
+            "properties": {
+                "field": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "utils.Response": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        }
+    }
 }

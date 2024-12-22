@@ -1,4 +1,422 @@
+definitions:
+  services.Snippet:
+    properties:
+      code:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      is_public:
+        type: string
+      language:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    required:
+    - code
+    - description
+    - language
+    - title
+    type: object
+  services.User:
+    properties:
+      auth_token:
+        type: string
+      avatar:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - username
+    type: object
+  types.SnippetWithUser:
+    properties:
+      avatar:
+        type: string
+      code:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      is_public:
+        type: string
+      language:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+      username:
+        type: string
+    required:
+    - code
+    - description
+    - email
+    - language
+    - title
+    - username
+    type: object
+  types.UpdateOneData:
+    properties:
+      field:
+        type: string
+      value:
+        type: string
+    required:
+    - field
+    - value
+    type: object
+  utils.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
 info:
   contact: {}
-paths: {}
+paths:
+  /signin:
+    post:
+      consumes:
+      - application/json
+      description: Sign in using GitHub OAuth. Exchange the authorization code for
+        a user session.
+      parameters:
+      - description: Authorization code from the OAuth session
+        in: query
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Authenticated user details
+          schema:
+            $ref: '#/definitions/services.User'
+        "400":
+          description: Invalid or missing authorization code
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Sign In
+      tags:
+      - auth
+  /signout:
+    post:
+      description: Terminate the user session and invalidate the API key.
+      parameters:
+      - description: Bearer token for authentication
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Successful sign-out confirmation
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized or invalid token
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Sign Out
+      tags:
+      - auth
+  /snippets:
+    get:
+      description: Retrieve all snippets, with optional filters.
+      parameters:
+      - description: Filter snippets by a specific string
+        in: query
+        name: param
+        type: string
+      - description: Page number, e.g., 0, 1, 2, ...
+        in: query
+        name: page
+        type: string
+      - description: Programming language to filter snippets
+        in: query
+        name: lang
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of snippets with user details
+          schema:
+            items:
+              $ref: '#/definitions/types.SnippetWithUser'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get Snippets
+      tags:
+      - snippet
+      - snippet
+    post:
+      consumes:
+      - application/json
+      description: Create a new snippet.
+      parameters:
+      - description: Bearer token for authentication
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created snippet details with user information
+          schema:
+            $ref: '#/definitions/types.SnippetWithUser'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create Snippet
+      tags:
+      - snippet
+  /snippets/{id}:
+    delete:
+      description: Delete a snippet by its ID. Only the snippet owner can perform
+        this action.
+      parameters:
+      - description: Snippet ID to be deleted
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: Snippet successfully deleted, no content returned
+        "401":
+          description: Unauthorized access
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Snippet not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error during deletion
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Snippet
+      tags:
+      - snippet
+    get:
+      description: Retrieve a snippet by its unique ID.
+      parameters:
+      - description: Unique identifier for the snippet
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Snippet details along with user information
+          schema:
+            $ref: '#/definitions/types.SnippetWithUser'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get Snippet
+      tags:
+      - snippet
+    patch:
+      consumes:
+      - application/json
+      description: Update multiple fields of a snippet, such as title, description,
+        and code.
+      parameters:
+      - description: Snippet ID to be updated
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated snippet data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/services.Snippet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated Snippet details
+          schema:
+            $ref: '#/definitions/types.SnippetWithUser'
+        "400":
+          description: Invalid request or missing parameters
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized access
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Snippet not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error during update
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update Snippet Fields
+      tags:
+      - snippet
+    put:
+      consumes:
+      - application/json
+      description: Update a single field of a snippet, such as the title, description,
+        or code.
+      parameters:
+      - description: Snippet ID to be updated
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Field and value to update
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/types.UpdateOneData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated Snippet details
+          schema:
+            $ref: '#/definitions/types.SnippetWithUser'
+        "400":
+          description: Invalid request or missing parameters
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized access
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Snippet not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update Snippet
+      tags:
+      - snippet
+  /users/{id}:
+    get:
+      description: Retrieve details of a specific user by their unique ID.
+      parameters:
+      - description: Unique ID of the user
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User details
+          schema:
+            $ref: '#/definitions/services.User'
+        "401":
+          description: Unauthorized access
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get User
+      tags:
+      - users
+  /users/{userid}/snippets:
+    get:
+      description: Retrieve all snippets created by a specific user, with optional
+        filters.
+      parameters:
+      - description: User ID whose snippets are being retrieved
+        in: path
+        name: userid
+        required: true
+        type: string
+      - description: Page number for pagination (e.g., 1, 2, 3, ...)
+        in: query
+        name: page
+        type: string
+      - description: Search parameter to filter snippets
+        in: query
+        name: param
+        type: string
+      - description: Programming language to filter snippets
+        in: query
+        name: lang
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of snippets with user details
+          schema:
+            items:
+              $ref: '#/definitions/utils.Response'
+            type: array
+        "404":
+          description: Error fetching snippets
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get User's Snippets
+      tags:
+      - snippet
 swagger: "2.0"

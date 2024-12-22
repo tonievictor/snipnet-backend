@@ -45,7 +45,7 @@ func Routes(rds *redis.Client) http.Handler {
 
 	users := services.User{}
 	auth_controller := controllers.NewAuthController(&users, &oauthConfig, logger, rds)
-	handleFunc("GET /signin", auth_controller.GitHubOauth)
+	handleFunc("POST /signin", auth_controller.GitHubOauth)
 	handleFunc("POST /signout", middleware.IsAuthenticated(auth_controller.Signout, logger, rds))
 
 	snippets := services.Snippet{}
@@ -58,7 +58,6 @@ func Routes(rds *redis.Client) http.Handler {
 	handleFunc("PATCH /snippets/{id}", middleware.IsAuthenticated(snippet_controller.UpdateSnippetOne, logger, rds))
 
 	user_controller := controllers.NewUserController(&users, logger, rds)
-	handleFunc("GET /users", middleware.IsAuthenticated(user_controller.GetUsers, logger, rds))
 	handleFunc("GET /users/{id}", middleware.IsAuthenticated(user_controller.GetUserByID, logger, rds))
 	handleFunc("GET /users/{id}/snippets", middleware.IsAuthenticated(snippet_controller.GetAllUserSnippets, logger, rds))
 

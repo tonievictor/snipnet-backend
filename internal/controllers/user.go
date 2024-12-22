@@ -27,17 +27,15 @@ func NewUserController(users services.UserStore, log *slog.Logger, rds *redis.Cl
 	}
 }
 
-func (u *UserController) GetUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := u.users.GetUsers()
-	if err != nil {
-		utils.WriteErr(w, http.StatusNotFound, "Unable to fetch users", err, u.log)
-		return
-	}
-
-	utils.WriteRes(w, http.StatusOK, "Users found", users, u.log)
-	return
-}
-
+// @Summary      Get User
+// @Description  Retrieve details of a specific user by their unique ID.
+// @Tags         users
+// @Produce      json
+// @Param        id   path      string  true  "Unique ID of the user"
+// @Success      200  {object}  services.User        "User details"
+// @Failure      401  {object}  utils.Response       "Unauthorized access"
+// @Failure      404  {object}  utils.Response       "User not found"
+// @Router       /users/{id} [get]
 func (u *UserController) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	session := r.Context().Value(types.AuthSession).(types.Session)
 	id := r.PathValue("id")
