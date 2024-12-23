@@ -11,9 +11,9 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"golang.org/x/oauth2"
 
-	"snipnet/internal/controllers"
-	"snipnet/lib/middleware"
-	"snipnet/lib/services"
+	"snipnet/controllers"
+	"snipnet/controllers/middleware"
+	"snipnet/services"
 )
 
 func Routes(rds *redis.Client) http.Handler {

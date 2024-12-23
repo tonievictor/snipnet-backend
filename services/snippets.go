@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"snipnet/lib/types"
+	"snipnet/types"
 )
 
 type SnippetStore interface {

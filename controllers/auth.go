@@ -12,9 +12,9 @@ import (
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/oauth2"
 
-	"snipnet/internal/utils"
-	"snipnet/lib/services"
-	"snipnet/lib/types"
+	utils "snipnet/controllers/responseutils"
+	"snipnet/services"
+	"snipnet/types"
 )
 
 const (

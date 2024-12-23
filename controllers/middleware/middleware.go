@@ -11,8 +11,8 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"snipnet/internal/utils"
-	"snipnet/lib/types"
+	utils "snipnet/controllers/responseutils"
+	"snipnet/types"
 )
 
 func Logger(next http.Handler) http.Handler {

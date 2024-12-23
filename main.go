@@ -8,11 +8,12 @@ import (
 	"github.com/tonie-ng/go-dotenv"
 
 	"snipnet/docs"
-	"snipnet/internal/api"
-	"snipnet/internal/routes"
-	"snipnet/lib/cache"
-	"snipnet/lib/database"
-	"snipnet/lib/services"
+	"snipnet/api"
+	"snipnet/routes"
+
+	"snipnet/database/cache"
+	"snipnet/database"
+	"snipnet/services"
 )
 
 func main() {

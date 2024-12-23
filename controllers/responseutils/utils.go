@@ -1,4 +1,4 @@
-package utils
+package responseutils
 
 import (
 	"encoding/json"

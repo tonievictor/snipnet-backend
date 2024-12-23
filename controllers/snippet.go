@@ -11,9 +11,9 @@ import (
 	"github.com/google/uuid"
 	redis "github.com/redis/go-redis/v9"
 
-	"snipnet/internal/utils"
-	"snipnet/lib/services"
-	"snipnet/lib/types"
+	utils "snipnet/controllers/responseutils"
+	"snipnet/services"
+	"snipnet/types"
 )
 
 type SnippetController struct {
