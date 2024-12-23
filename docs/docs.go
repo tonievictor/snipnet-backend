@@ -47,13 +47,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid or missing authorization code",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/responseutils.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/responseutils.Response"
                         }
                     }
                 }
@@ -84,19 +84,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Successful sign-out confirmation",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/responseutils.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized or invalid token",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/responseutils.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/responseutils.Response"
                         }
                     }
                 }
@@ -146,7 +146,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/responseutils.Response"
                         }
                     }
                 }
@@ -187,7 +187,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/responseutils.Response"
                         }
                     }
                 }
@@ -222,7 +222,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/responseutils.Response"
                         }
                     }
                 }
@@ -272,19 +272,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid request or missing parameters",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/responseutils.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized access",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/responseutils.Response"
                         }
                     },
                     "404": {
                         "description": "Snippet not found",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/responseutils.Response"
                         }
                     }
                 }
@@ -316,19 +316,19 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized access",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/responseutils.Response"
                         }
                     },
                     "404": {
                         "description": "Snippet not found",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/responseutils.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error during deletion",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/responseutils.Response"
                         }
                     }
                 }
@@ -378,25 +378,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid request or missing parameters",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/responseutils.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized access",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/responseutils.Response"
                         }
                     },
                     "404": {
                         "description": "Snippet not found",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/responseutils.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error during update",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/responseutils.Response"
                         }
                     }
                 }
@@ -431,13 +431,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized access",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/responseutils.Response"
                         }
                     },
                     "404": {
                         "description": "User not found",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/responseutils.Response"
                         }
                     }
                 }
@@ -486,14 +486,14 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/utils.Response"
+                                "$ref": "#/definitions/responseutils.Response"
                             }
                         }
                     },
                     "404": {
                         "description": "Error fetching snippets",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/responseutils.Response"
                         }
                     }
                 }
@@ -501,6 +501,18 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "responseutils.Response": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
         "services.Snippet": {
             "type": "object",
             "required": [
@@ -630,18 +642,6 @@ const docTemplate = `{
                 },
                 "value": {
                     "type": "string"
-                }
-            }
-        },
-        "utils.Response": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "message": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "boolean"
                 }
             }
         }

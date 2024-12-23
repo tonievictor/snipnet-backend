@@ -1,4 +1,12 @@
 definitions:
+  responseutils.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
   services.Snippet:
     properties:
       code:
@@ -89,14 +97,6 @@ definitions:
     - field
     - value
     type: object
-  utils.Response:
-    properties:
-      data: {}
-      message:
-        type: string
-      status:
-        type: boolean
-    type: object
 info:
   contact: {}
 paths:
@@ -122,11 +122,11 @@ paths:
         "400":
           description: Invalid or missing authorization code
           schema:
-            $ref: '#/definitions/utils.Response'
+            $ref: '#/definitions/responseutils.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/utils.Response'
+            $ref: '#/definitions/responseutils.Response'
       summary: Sign In
       tags:
       - auth
@@ -143,15 +143,15 @@ paths:
         "200":
           description: Successful sign-out confirmation
           schema:
-            $ref: '#/definitions/utils.Response'
+            $ref: '#/definitions/responseutils.Response'
         "401":
           description: Unauthorized or invalid token
           schema:
-            $ref: '#/definitions/utils.Response'
+            $ref: '#/definitions/responseutils.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/utils.Response'
+            $ref: '#/definitions/responseutils.Response'
       security:
       - ApiKeyAuth: []
       summary: Sign Out
@@ -185,7 +185,7 @@ paths:
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/utils.Response'
+            $ref: '#/definitions/responseutils.Response'
       summary: Get Snippets
       tags:
       - snippet
@@ -210,7 +210,7 @@ paths:
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/utils.Response'
+            $ref: '#/definitions/responseutils.Response'
       security:
       - ApiKeyAuth: []
       summary: Create Snippet
@@ -232,15 +232,15 @@ paths:
         "401":
           description: Unauthorized access
           schema:
-            $ref: '#/definitions/utils.Response'
+            $ref: '#/definitions/responseutils.Response'
         "404":
           description: Snippet not found
           schema:
-            $ref: '#/definitions/utils.Response'
+            $ref: '#/definitions/responseutils.Response'
         "500":
           description: Internal server error during deletion
           schema:
-            $ref: '#/definitions/utils.Response'
+            $ref: '#/definitions/responseutils.Response'
       security:
       - ApiKeyAuth: []
       summary: Delete Snippet
@@ -264,7 +264,7 @@ paths:
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/utils.Response'
+            $ref: '#/definitions/responseutils.Response'
       summary: Get Snippet
       tags:
       - snippet
@@ -295,19 +295,19 @@ paths:
         "400":
           description: Invalid request or missing parameters
           schema:
-            $ref: '#/definitions/utils.Response'
+            $ref: '#/definitions/responseutils.Response'
         "401":
           description: Unauthorized access
           schema:
-            $ref: '#/definitions/utils.Response'
+            $ref: '#/definitions/responseutils.Response'
         "404":
           description: Snippet not found
           schema:
-            $ref: '#/definitions/utils.Response'
+            $ref: '#/definitions/responseutils.Response'
         "500":
           description: Internal server error during update
           schema:
-            $ref: '#/definitions/utils.Response'
+            $ref: '#/definitions/responseutils.Response'
       security:
       - ApiKeyAuth: []
       summary: Update Snippet Fields
@@ -340,15 +340,15 @@ paths:
         "400":
           description: Invalid request or missing parameters
           schema:
-            $ref: '#/definitions/utils.Response'
+            $ref: '#/definitions/responseutils.Response'
         "401":
           description: Unauthorized access
           schema:
-            $ref: '#/definitions/utils.Response'
+            $ref: '#/definitions/responseutils.Response'
         "404":
           description: Snippet not found
           schema:
-            $ref: '#/definitions/utils.Response'
+            $ref: '#/definitions/responseutils.Response'
       security:
       - ApiKeyAuth: []
       summary: Update Snippet
@@ -373,11 +373,11 @@ paths:
         "401":
           description: Unauthorized access
           schema:
-            $ref: '#/definitions/utils.Response'
+            $ref: '#/definitions/responseutils.Response'
         "404":
           description: User not found
           schema:
-            $ref: '#/definitions/utils.Response'
+            $ref: '#/definitions/responseutils.Response'
       summary: Get User
       tags:
       - users
@@ -410,12 +410,12 @@ paths:
           description: List of snippets with user details
           schema:
             items:
-              $ref: '#/definitions/utils.Response'
+              $ref: '#/definitions/responseutils.Response'
             type: array
         "404":
           description: Error fetching snippets
           schema:
-            $ref: '#/definitions/utils.Response'
+            $ref: '#/definitions/responseutils.Response'
       summary: Get User's Snippets
       tags:
       - snippet

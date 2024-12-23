@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -37,14 +36,14 @@ func (a *APIServer) Init(router http.Handler) {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
 	defer stop()
 
-	otelShutDown, err := setupOTelSDK(ctx)
-	if err != nil {
-		return
-	}
-
-	defer func() {
-		err = errors.Join(err, otelShutDown(context.Background()))
-	}()
+	// otelShutDown, err := setupOTelSDK(ctx)
+	// if err != nil {
+	// 	return
+	// }
+	//
+	// defer func() {
+	// 	err = errors.Join(err, otelShutDown(context.Background()))
+	// }()
 
 	serverErr := make(chan error, 1)
 	go func() {
@@ -52,13 +51,14 @@ func (a *APIServer) Init(router http.Handler) {
 	}()
 
 	select {
-	case err = <-serverErr:
+	case err := <-serverErr:
 		slog.Error("API", slog.String("error", err.Error()))
 		return
 	case <-ctx.Done():
 		slog.Info("API", slog.String("SHUTDOWN", "Graceful shutdown: received\n"))
 		stop()
 	}
-	err = server.Shutdown(context.Background())
+
+	server.Shutdown(context.Background())
 	return
 }
