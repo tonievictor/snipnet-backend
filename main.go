@@ -20,7 +20,7 @@ func main() {
 	docs.SwaggerInfo.Title = "Snipnet API"
 	docs.SwaggerInfo.Description = "API for Snipnet, a code snippet storage and sharing platform."
 	docs.SwaggerInfo.Version = "0.1"
-	docs.SwaggerInfo.Host = "localhost:8080" // hardcoded for now.
+	docs.SwaggerInfo.Host = os.Getenv("API_HOST") // e.g localhost:8080
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 
