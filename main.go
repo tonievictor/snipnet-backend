@@ -5,14 +5,13 @@ import (
 	"os"
 
 	_ "github.com/lib/pq"
-	"github.com/tonie-ng/go-dotenv"
+	"github.com/tonievictor/dotenv"
 
-	"snipnet/docs"
 	"snipnet/api"
-	"snipnet/routes"
-
-	"snipnet/database/cache"
 	"snipnet/database"
+	"snipnet/database/cache"
+	"snipnet/docs"
+	"snipnet/routes"
 	"snipnet/services"
 )
 

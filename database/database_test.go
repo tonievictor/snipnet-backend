@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	_ "github.com/lib/pq"
-	"github.com/tonie-ng/go-dotenv"
+	"github.com/tonievictor/dotenv"
 )
 
 func TestDB(t *testing.T) {
